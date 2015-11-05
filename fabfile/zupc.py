@@ -53,7 +53,7 @@ def import_contours():
 
 
 @task
-def import_zupc(zupc_file, import_='True'):
+def import_zupc(import_='True'):
     require.files.directory('/tmp/zupc')
     with cd('/tmp/zupc/'):
         string = run("for i in *; do echo $i; done")
@@ -64,9 +64,9 @@ def import_zupc(zupc_file, import_='True'):
             run('rm {}'.format(f))
         if import_=='True':
             import_contours()
-        put(zupc_file,'.')
-    basename = os.path.basename(zupc_file)
+        run('wget https://www.data.gouv.fr/s/resources/zones-uniques-de-prises-en-charge-des-taxis-zupc/20151023-174638/zupc.geojson')
+
     with python.virtualenv(env.relative_venv_path), cd(env.relative_api_path):
         with shell_env(APITAXI_CONFIG_FILE=env.config_filename):
-            run('python manage.py load_zupc {} /tmp/zupc/{}'.format(
-                env.conf_api.SQLALCHEMY_DATABASE_URI, basename))
+            run('python manage.py load_zupc {} /tmp/zupc/zupc.geojson'.format(
+                env.conf_api.SQLALCHEMY_DATABASE_URI))
