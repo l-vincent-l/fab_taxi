@@ -1,12 +1,12 @@
 from os import path
-from fabric.api import env
+from fabric.api import env, task
 
-
-def load_config_sample():
-    env.hosts = ['apiovh']
+@task
+def load_config_dev():
+    env.hosts = ['root@dev.api.taxi']
     env.use_ssh_config = True
     env.relative_api_path = 'APITaxi'
-    env.config_filename = 'prod_settings.py'
+    env.config_filename = 'dev_settings.py'
     env.relative_config_path = path.join(env.relative_api_path, 'APITaxi',
         env.config_filename)
     env.relative_venv_path = path.join(env.relative_api_path, 'venvAPITaxi')
@@ -15,8 +15,12 @@ def load_config_sample():
 
     env.wsgi_processes = 1
     env.wsgi_threads = 10
+    env.wwwdata_logdir = '/var/log/uwsgi'
+    env.wwwdata_piddir = '/var/run/uwsgi'
+    env.uwsgi_log = env.wwwdata_logdir
+    env.uwsgi_pid = env.wwwdata_piddir
 
-    env.server_name = 'localhost'
+    env.server_name = 'dev.api.taxi'
 
     env.uwsgi_socket = '/tmp/uwsgi.sock'
     env.postgres_locale = 'fr_FR.UTF-8'

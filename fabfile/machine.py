@@ -7,6 +7,15 @@ from fabric.context_managers import cd
 import re
 
 
+def install_system():
+    run('apt-get update')
+    run('apt-get --force-yes upgrade')
+    run('apt-get --force-yes install sudo')
+    require.system.locale(env.postgres_locale)
+    require.files.directory(env.wwwdata_logdir, owner='www-data', group='adm')
+    require.files.directory(env.wwwdata_piddir, owner='www-data', group='adm')
+
+
 def install_postgres_postgis():
     require.postgres.server()
     u = url.make_url(env.conf_api.SQLALCHEMY_DATABASE_URI)
@@ -22,10 +31,12 @@ def install_dependencies():
     require.deb.packages(['autoconf-archive', 'automake-1.14', 'autoconf2.59',
         'build-essential', 'check', 'libspatialindex-dev', 'git',
         'libgcrypt11-dev', 'unzip', 'cmake', 'libpq-dev', 'python2.7-dev',
-        'supervisor', 'locales', 'postgis', 'curl'])
+        'supervisor', 'locales', 'postgis', 'curl', 'libpcre3', 'libpcre3-dev'])
     install_postgres_postgis()
     require.nginx.server()
 
+def add_users():
+         require.users.user('taxis')
 
 def install_krmt():
     if files.exists('krmt/geo.so'):
@@ -91,5 +102,7 @@ def restart_services():
 
 @task
 def install_machine():
+    install_system()
     install_dependencies()
+    add_users()
     install_services()

@@ -11,6 +11,7 @@ def deploy_nginx_api_site():
     absolute_uwsgi_config_path = run('readlink -f {}'.format(env.relative_uwsgi_config_path))
     absolute_wsgi_file = run('readlink -f {}'.format(env.relative_wsgi_file))
 
+
     uwsgi = path.join(absolute_venv_path, 'bin', 'uwsgi')
     files.upload_template('templates/uwsgi.ini',  absolute_uwsgi_config_path,
         context={
@@ -19,6 +20,8 @@ def deploy_nginx_api_site():
            'absolute_venv_path': absolute_venv_path,
            'uwsgi_socket': env.uwsgi_socket,
            'wsgi_file': absolute_wsgi_file,
+           'wsgi_pid': env.uwsgi_pid,
+           'wsgi_log': env.uwsgi_log,
            'socket': env.uwsgi_socket,
            'processes': env.wsgi_processes,
            'threads': env.wsgi_threads

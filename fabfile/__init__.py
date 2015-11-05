@@ -11,7 +11,7 @@ from geoserver import deploy_geoserver, restart_geotaxi
 from api import deploy_api, upgrade_api, restart_api
 from zupc import import_zupc
 from dash import *
-from env import env
+from env import env, load_config_dev
 import logging
 logging.basicConfig()
 
