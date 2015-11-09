@@ -50,23 +50,22 @@ def create_db_influxdb():
             .format(influx_url, env.conf_api.INFLUXDB_USER,
                 env.conf_api.INFLUXDB_PASSWORD))
     run('curl {} -u {} -p {} --data-urlencode "q=CREATE DATABASE {}"'.format(
-        influx_url, env.conf_api.INFLUXDB_USER, 
+        influx_url, env.conf_api.INFLUXDB_USER,
         env.conf_api.INFLUXDB_PASSWORD, env.conf_api.INFLUXDB_TAXIS_DB))
 
 
 @task
 def restart_stats_workers():
-    absolute_venv_path = run('readlink -f {}'.format(env.relative_venv_path))
-
+    celery = "{venv}/bin/celery".format(env.apitaxi_venv_path)
     require.supervisor.process('stat_beat',
-        command="{venv}/bin/celery beat --app=celery_worker.celery".format(venv=absolute_venv_path),
-        directory=absolute_venv_path,
-        environment='APITAXI_CONFIG_FILE="{}"'.format(env.config_filename))
+        command="{celery} beat --app=celery_worker.celery".format(celery=celery),
+        directory=env.apitaxi_venv_path,
+        environment='APITAXI_CONFIG_FILE="{}"'.format(env.apitaxi_config_path))
 
     require.supervisor.process('stat_worker',
-        command="{venv}/bin/celery worker --app=celery_worker.celery".format(venv=absolute_venv_path),
-        directory=absolute_venv_path,
-        environment='APITAXI_CONFIG_FILE="{}"'.format(env.config_filename))
+        command="{celery} worker --app=celery_worker.celery".format(celery=celery),
+        directory=env.apitaxi_venv_path,
+        environment='APITAXI_CONFIG_FILE="{}"'.format(env.apitaxi_config_path))
 @task
 def install_dash():
     install_influxdb()

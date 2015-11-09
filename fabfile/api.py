@@ -6,32 +6,27 @@ from os import environ, path
 
 
 def deploy_nginx_api_site():
-    absolute_api_path = run('readlink -f {}'.format(env.relative_api_path))
-    absolute_venv_path = run('readlink -f {}'.format(env.relative_venv_path))
-    absolute_uwsgi_config_path = run('readlink -f {}'.format(env.relative_uwsgi_config_path))
-    absolute_wsgi_file = run('readlink -f {}'.format(env.relative_wsgi_file))
-
-
-    uwsgi = path.join(absolute_venv_path, 'bin', 'uwsgi')
-    files.upload_template('templates/uwsgi.ini',  absolute_uwsgi_config_path,
+    files.upload_template('templates/uwsgi.ini',  env.uwsgi_config_path,
         context={
-           'config_filename': env.config_filename,
-           'absolute_api_path': absolute_api_path,
-           'absolute_venv_path': absolute_venv_path,
+           'config_path': env.apitaxi_config_path,
+           'api_path': env.apitaxi_dir,
+           'venv_path': env.apitaxi_venv_path,
            'uwsgi_socket': env.uwsgi_socket,
-           'wsgi_file': absolute_wsgi_file,
-           'wsgi_pid': env.uwsgi_pid,
-           'wsgi_log': env.uwsgi_log,
+           'uwsgi_file': env.uwsgi_file,
+           'uwsgi_pid_dir': env.wwwdata_piddir,
+           'uwsgi_log_dir': env.wwwdata_logdir,
            'socket': env.uwsgi_socket,
            'processes': env.wsgi_processes,
            'threads': env.wsgi_threads
-           }
+       }
     )
 
+    uwsgi = path.join(env.apitaxi_venv_path, 'bin', 'uwsgi')
     require.supervisor.process('uwsgi',
-        command='{} --ini {}'.format(uwsgi, absolute_uwsgi_config_path),
-        directory=absolute_venv_path,
-        stdout_logfile = '/var/log/nginx/apitaxi.log')
+        command='{} --ini {}'.format(uwsgi, env.uwsgi_config_path),
+        directory=env.apitaxi_venv_path,
+        stdout_logfile = '/var/log/nginx/apitaxi.log'
+    )
 
     require.nginx.site('apitaxi',
         template_source='templates/nginx_site.conf',
@@ -43,24 +38,27 @@ def deploy_nginx_api_site():
 
 @task
 def deploy_api():
-    if not files.exists('APITaxi'):
+    if files.exists(env.apitaxi_dir):
+        return
+    with cd(env.uwsgi_dir):
         git.clone('https://github.com/openmaraude/APITaxi')
-    require.python.virtualenv(env.relative_venv_path)
-    with python.virtualenv(env.relative_venv_path):
-        python.install_pip()
-        put(environ['APITAXI_CONFIG_FILE'], env.relative_config_path)
-    deploy_nginx_api_site()
+        require.python.virtualenv(env.apitaxi_venv_path)
+        with python.virtualenv(env.apitaxi_venv_path):
+            python.install_pip()
+            require.python.package('uwsgi')
+        deploy_nginx_api_site()
 
 
 @task
 def upgrade_api():
-    git.pull('APITaxi')
-    with python.virtualenv(env.relative_venv_path), cd(env.relative_api_path):
-        with shell_env(APITAXI_CONFIG_FILE=env.config_filename):
+    with python.virtualenv(env.apitaxi_venv_path), cd(env.apitaxi_dir):
+        with shell_env(APITAXI_CONFIG_FILE=env.apitaxi_config_path):
+            git.pull('.')
+            put(environ['APITAXI_CONFIG_FILE'], env.apitaxi_config_path)
             python.install_requirements('requirements.txt')
-            require.python.package('uwsgi')
             run('python manage.py db upgrade')
     restart_api()
+
 
 @task
 def restart_api():
