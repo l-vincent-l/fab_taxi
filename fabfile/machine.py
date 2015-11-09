@@ -1,19 +1,29 @@
 from fabric.api import task, env, settings, sudo
-from fabric.operations import run, put, sudo
+from fabric.operations import run, put, sudo, prompt
 from fabtools import require, supervisor
 from sqlalchemy.engine import url
 from fabric.contrib import files
 from fabric.context_managers import cd
 import re
 
-
+@task
 def install_system():
-    run('su root -c "apt-get --force-yes install sudo && adduser {} sudo"'.format(env.user))
+    deploy_user = env.user
+    env.user = 'root'
     require.deb.uptodate_index()
-    sudo('apt-get --force-yes upgrade')
+    run('apt-get --force-yes upgrade')
+    require.deb.package('sudo')
+    password = prompt('{} password:'.format(deploy_user))
+    require.users.user(deploy_user, password=password)
+    require.users.sudoer(deploy_user)
+    env.user = deploy_user
     require.system.locale(env.postgres_locale)
-    require.files.directory(env.wwwdata_logdir, owner='www-data', group='adm')
-    require.files.directory(env.wwwdata_piddir, owner='www-data', group='adm')
+    require.files.directory(env.wwwdata_logdir, owner='www-data', group='adm',
+            use_sudo=True)
+    require.files.directory(env.wwwdata_piddir, owner='www-data', group='adm',
+            use_sudo=True)
+    require.files.directory(env.uwsgi_dir, owner=env.user,
+            use_sudo=True)
 
 
 def install_postgres_postgis():
