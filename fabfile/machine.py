@@ -8,9 +8,9 @@ import re
 
 
 def install_system():
-    run('apt-get update')
-    run('apt-get --force-yes upgrade')
-    run('apt-get --force-yes install sudo')
+    run('su root -c "apt-get --force-yes install sudo && adduser {} sudo"'.format(env.user))
+    require.deb.uptodate_index()
+    sudo('apt-get --force-yes upgrade')
     require.system.locale(env.postgres_locale)
     require.files.directory(env.wwwdata_logdir, owner='www-data', group='adm')
     require.files.directory(env.wwwdata_piddir, owner='www-data', group='adm')
@@ -102,7 +102,6 @@ def restart_services():
 
 @task
 def install_machine():
-    install_system()
     install_dependencies()
     add_users()
     install_services()
