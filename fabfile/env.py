@@ -3,7 +3,8 @@ from fabric.api import env, task
 
 @task
 def load_config_dev():
-    env.hosts = ['root@dev.api.taxi']
+    env.hosts = ['dev.api.taxi']
+    env.user = 'deploy'
     env.use_ssh_config = True
     env.relative_api_path = 'APITaxi'
     env.config_filename = 'dev_settings.py'
