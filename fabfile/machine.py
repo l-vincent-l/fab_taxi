@@ -49,19 +49,21 @@ def add_users():
          require.users.user('taxis')
 
 def install_krmt():
-    if files.exists('krmt/geo.so'):
+    if files.exists('/usr/lib/krmt/geo.so'):
         return
-    run('wget https://github.com/mattsta/krmt/archive/master.zip -O krmt.zip')
-    run('unzip krmt.zip')
-    run('rm krmt.zip')
-    run('mv krmt-master krmt')
-    with cd('krmt'):
-        run('make')
+    with cd('/tmp'):
+        run('wget https://github.com/mattsta/krmt/archive/master.zip -O krmt.zip')
+        run('unzip krmt.zip')
+        run('rm krmt.zip')
+        run('mv krmt-master krmt')
+        with cd('krmt'):
+            run('make')
+        require.files.directory('/usr/lib/krmt', use_sudo=True)
+        sudo('mv krmt/*so /usr/lib/krmt')
+        run('rm -rf yajl krmt')
 
 
 def install_yajl():
-    if files.exists('yajl/build/yajl-*/bin/json_reformat'):
-        return
     run('wget https://github.com/lloyd/yajl/archive/master.zip -O yajl.zip')
     run('unzip yajl.zip')
     run('mv yajl-master yajl')
@@ -72,22 +74,25 @@ def install_yajl():
 
 
 def install_redis():
-    if files.exists('redis/src/redis-server'):
+    if files.exists('/usr/bin/redis-server'):
+        print 'Redis is already installed'
         return
-    run('wget https://github.com/mattsta/redis/archive/dynamic-redis-2.8.zip')
-    run('unzip dynamic-redis-2.8.zip')
-    run('rm dynamic-redis-2.8.zip')
-    run('mv redis-dynamic-redis-2.8 redis')
-    with cd('redis'):
-        run('make')
-        sudo('cp src/redis-server /usr/bin/redis-server')
-        sudo('chown {0}:{0} /usr/bin/redis-server'.format(env.user))
+    with cd('/tmp/'):
+        install_yajl()
+        run('wget https://github.com/mattsta/redis/archive/dynamic-redis-2.8.zip')
+        run('unzip dynamic-redis-2.8.zip')
+        run('rm dynamic-redis-2.8.zip')
+        run('mv redis-dynamic-redis-2.8 redis')
+        with cd('redis'):
+            run('make')
+            sudo('cp src/redis-server /usr/bin/redis-server')
+            sudo('chown {0}:{0} /usr/bin/redis-server'.format(env.user))
 
 
 def install_services():
     install_redis()
-    install_yajl()
     install_krmt()
+    run('rm -rf /tmp/redis')
     if not files.exists('/var/run/supervisor.sock'):
         sudo('supervisord -c /etc/supervisor/supervisord.conf')
     supervisor.reload_config()
@@ -95,8 +100,7 @@ def install_services():
 
 @task
 def restart_services():
-    geoso = run('readlink -f krmt/geo.so')
-    command = 'redis-server --module-add {} '.format(geoso)
+    command = 'redis-server --module-add /usr/lib/krmt/geo.so '
     if 'redis_conf' in env.__dict__.keys():
         put(env.local_redis_conf, 'redis/redis.conf')
         redis_conf = run('readlink -f redis/redis.conf')
@@ -105,7 +109,7 @@ def restart_services():
         redis_port = re.search(r'redis://.*:.*@*.:(\d+)', env.conf_api.REDIS_URL).group(1)
         command += ' --port {}'.format(redis_port)
     require.files.directory('/var/log/redis', use_sudo=True, owner=env.user)
-    require.files.file('/var/log/redis/error.log', owner=env.user)
+    require.files.file('/var/log/redis/error.log', owner=env.user, use_sudo=True)
     require.supervisor.process('redis', command=command,
             stdout_logfile='/var/log/redis/error.log')
 
