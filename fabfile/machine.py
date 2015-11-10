@@ -10,20 +10,24 @@ import re
 def install_system():
     deploy_user = env.user
     env.user = 'root'
-    require.deb.uptodate_index()
-    run('apt-get --force-yes upgrade')
     require.deb.package('sudo')
     password = prompt('{} password:'.format(deploy_user))
     require.users.user(deploy_user, password=password)
     require.users.sudoer(deploy_user)
-    env.user = deploy_user
+    require.deb.uptodate_index()
+    run('apt-get --force-yes upgrade')
     require.system.locale(env.postgres_locale)
-    require.files.directory(env.wwwdata_logdir, owner='www-data', group='adm',
+    require.files.directory(env.uwsgi_logdir, owner='www-data', group='adm',
             use_sudo=True)
-    require.files.directory(env.wwwdata_piddir, owner='www-data', group='adm',
+    require.files.directory(env.uwsgi_launcher_logdir, owner=deploy_user, group='adm',
             use_sudo=True)
-    require.files.directory(env.uwsgi_dir, owner=env.user,
+    require.files.directory(env.uwsgi_pid_dir, owner='www-data', group='adm',
             use_sudo=True)
+    require.files.directory(env.uwsgi_socket_dir, owner='www-data', group='adm',
+            use_sudo=True)
+    require.files.directory(env.uwsgi_dir, owner=deploy_user,
+            use_sudo=True)
+    env.user = deploy_user
 
 
 def install_postgres_postgis():
@@ -41,7 +45,8 @@ def install_dependencies():
     require.deb.packages(['autoconf-archive', 'automake-1.14', 'autoconf2.59',
         'build-essential', 'check', 'libspatialindex-dev', 'git',
         'libgcrypt11-dev', 'unzip', 'cmake', 'libpq-dev', 'python2.7-dev',
-        'supervisor', 'locales', 'postgis', 'curl', 'libpcre3', 'libpcre3-dev'])
+        'supervisor', 'locales', 'postgis', 'curl', 'libpcre3', 'libpcre3-dev',
+        'unzip'])
     install_postgres_postgis()
     require.nginx.server()
 
@@ -87,6 +92,8 @@ def install_redis():
             run('make')
             sudo('cp src/redis-server /usr/bin/redis-server')
             sudo('chown {0}:{0} /usr/bin/redis-server'.format(env.user))
+            sudo('cp src/redis-cli /usr/bin/redis-cli')
+            sudo('chown {0}:{0} /usr/bin/redis-cli'.format(env.user))
 
 
 def install_services():
