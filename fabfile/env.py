@@ -3,32 +3,36 @@ from fabric.api import env, task
 
 def make_default_values():
     if not hasattr(env, 'apitaxi_dir'):
-        env.apitaxi_dir = env.uwsgi_dir + '/APITaxi'
+        env.apitaxi_dir = lambda now: env.deployment_dir(now) + '/APITaxi-master'
     if not hasattr(env, 'uwsgi_config_path'):
-        env.uwsgi_config_path = env.apitaxi_dir + '/uwsgi.ini'
+        env.uwsgi_config_path = lambda now: env.apitaxi_dir(now) + '/uwsgi.ini'
     if not hasattr(env, 'uwsgi_file'):
-        env.uwsgi_file = env.apitaxi_dir + '/api_taxi.uwsgi'
+        env.uwsgi_file = lambda now: env.apitaxi_dir(now) + '/api_taxi.uwsgi'
     if not hasattr(env, 'apitaxi_venv_path'):
-        env.apitaxi_venv_path = env.uwsgi_dir + '/venvAPITaxi'
+        env.apitaxi_venv_path = lambda now: env.deployment_dir(now) + '/venvAPITaxi'
     if not hasattr(env, 'apitaxi_config_path'):
-        env.apitaxi_config_path = env.apitaxi_dir + '/APITaxi/prod_settings.py'
+        env.apitaxi_config_path = lambda now: env.apitaxi_dir(now) + '/APITaxi/prod_settings.py'
 
 @task
 def load_config_dev():
-    env.hosts = ['dev.api.taxi']
+    env.hosts = ['vbox']
     env.user = 'deploy'
     env.use_ssh_config = True
 
     env.uwsgi_dir = '/srv/www'
+    env.deployment_dir = lambda now: env.uwsgi_dir + '/deployment_{}'.format(now)
 
     env.wsgi_processes = 1
     env.wsgi_threads = 10
-    env.wwwdata_logdir = '/var/log/uwsgi'
-    env.wwwdata_piddir = '/var/run/uwsgi'
+    env.uwsgi_logdir = '/var/log/uwsgi'
+    env.uwsgi_launcher_logdir = '/var/log/uwsgi_launcher'
+    env.uwsgi_pid_dir = '/var/run/uwsgi'
+    env.uwsgi_pid_file = lambda now: '{}/uwsgi_{}.pid'.format(env.uwsgi_pid_dir, now)
 
     env.server_name = 'dev.api.taxi'
 
-    env.uwsgi_socket = '/tmp/uwsgi.sock'
+    env.uwsgi_socket_dir = '/var/run/uwsgi_socket'
+    env.uwsgi_socket = lambda now: env.uwsgi_socket_dir + '/apitaxi_{}.sock'.format(now)
     env.postgres_locale = 'fr_FR.UTF-8'
     env.local_redis_conf = 'files/redis.conf'
 
