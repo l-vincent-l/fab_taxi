@@ -1,3 +1,4 @@
+#coding: utf-8
 from fabtools import require, git, python, nginx, supervisor, service, files
 from fabric.context_managers import cd, shell_env
 from fabric.api import put, run, task, env
@@ -41,12 +42,21 @@ def deploy_nginx_api_site(now):
 
     test_uwsgi_is_started(now)
 
+    celery = path.join(env.apitaxi_venv_path(now), 'bin', 'celery')
+
+    require.supervisor.process('send_hail_{}'.format(now),
+        command='APITAXI_CONFIG_FILE="{}" {} --app=celery_worker.celery -Q deployment_{}'.format(env.apitaxi_config_path(now), celery, now),
+        directory=env.apitaxi_venv_path(now),
+        stdout_logfile='/var/log/celery/send_hail.log',
+    )
+
     require.nginx.site('apitaxi',
         template_source='templates/nginx_site.conf',
         domain_name=getattr(env.conf_api, 'HOST', 'localhost'),
         port=getattr(env.conf_api, 'PORT', 80),
         socket=env.uwsgi_socket(now)
     )
+
 
 def clean_directories(now):
     l = run('for i in {}/deployment_*; do echo $i; done'.format(env.uwsgi_dir)).split("\n")
@@ -68,16 +78,32 @@ def clean_directories(now):
 
 
 def stop_old_processes(now):
-    l = run('for i in /etc/supervisor/conf.d/uwsgi_*; do echo $i; done').split("\n")
-    for f in l:
-        if f == env.deployment_dir:
-            continue
-        m = re.search(r'([^/]*).conf$', f)
-        if not m:
-            continue
-        process = m.group(1)
-        supervisor.stop_process(process)
-        files.remove(f, use_sudo=True)
+    def stop_process(name, visitor):
+        l = run('for i in /etc/supervisor/conf.d/{}_*; do echo $i; done'.format(name)).split("\n")
+        for f in l:
+            if str(now) in f:
+                continue
+            m = re.search(r'([^/]*).conf$', f)
+            if not m:
+                continue
+            process = m.group(1)
+            visitor(process)
+            files.remove(f, use_sudo=True)
+
+    stop_process('uwsgi', lambda p:supervisor.stop_process(p))
+    def stop_queues(process):
+        #Request' status is failure after 15 secs in received
+        #So even if queue is not empty we can shutdown the process
+        for i in range(1, 17):
+            run('python manage.py active_tasks {}'.format(process))
+            time.sleep(i)
+        supervisor.stop_process(p)
+
+
+    with cd(env.apitaxi_dir(now)):
+        with python.virtualenv(env.apitaxi_venv_path(now)),\
+             shell_env(APITAXI_CONFIG_FILE=env.apitaxi_config_path(now)):
+            stop_process('send_hail', stop_queues)
 
 
 @task
@@ -85,7 +111,7 @@ def deploy_api():
     now = int(time.time())
     require.files.directory(env.deployment_dir(now))
     with cd(env.deployment_dir(now)):
-        run('wget https://github.com/openmaraude/APITaxi/archive/master.zip')
+        run(u'wget {}'.format(env.apitaxi_archive))
         run('unzip master.zip')
 
     with cd(env.apitaxi_dir(now)):
@@ -95,7 +121,8 @@ def deploy_api():
             require.python.package('uwsgi')
             python.install_requirements('requirements.txt')
             put(environ['APITAXI_CONFIG_FILE'], env.apitaxi_config_path(now))
-            run('python manage.py db upgrade')
+            with shell_env(APITAXI_CONFIG_FILE=env.apitaxi_config_path(now)):
+                run('python manage.py db upgrade')
         deploy_nginx_api_site(now)
     if not service.is_running('nginx'):
         service.start('nginx')

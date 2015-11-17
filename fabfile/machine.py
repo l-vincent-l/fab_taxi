@@ -19,13 +19,15 @@ def install_system():
     require.system.locale(env.postgres_locale)
     require.files.directory(env.uwsgi_logdir, owner='www-data', group='adm',
             use_sudo=True)
-    require.files.directory(env.uwsgi_launcher_logdir, owner=deploy_user, group='adm',
+    require.files.directory(env.uwsgi_launcher_logdir, owner='www-data', group='adm',
             use_sudo=True)
     require.files.directory(env.uwsgi_pid_dir, owner='www-data', group='adm',
             use_sudo=True)
     require.files.directory(env.uwsgi_socket_dir, owner='www-data', group='adm',
             use_sudo=True)
     require.files.directory(env.uwsgi_dir, owner=deploy_user,
+            use_sudo=True)
+    require.files.directory('/var/log/celery', owner='www-data', group='adm',
             use_sudo=True)
     env.user = deploy_user
 
