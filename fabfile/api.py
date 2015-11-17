@@ -6,10 +6,15 @@ import time, re
 
 
 def test_uwsgi_is_started(now):
+    for i in range(1, 30):
+        status = supervisor.process_status('uwsgi_{}'.format(now))
+        if status == 'RUNNING':
+            break
+        time.sleep(i*0.1)
     testing_file = '/tmp/test_uwsgi.py'
     if files.is_file(testing_file):
         files.remove(testing_file)
-    put('files/test_uwsgi.py', testing_file)
+    put('files/test_uwsgi.py', '/tmp/')
 
     output = run('python {} {} {}'.format(testing_file, env.uwsgi_socket(now), env.server_name))
     assert '"message"' in output
