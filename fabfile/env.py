@@ -40,3 +40,6 @@ def load_config_dev():
     env.influx_db_dir = '/var/influx'
     env.geoserver_port = 80
     make_default_values()
+
+env.contours_fichier = u'http://osm13.openstreetmap.fr/~cquest/openfla/export/communes-20150101-5m-shp.zip'
+env.zupc_fichier = u'https://www.data.gouv.fr/s/resources/zones-uniques-de-prises-en-charge-des-taxis-zupc/20151023-174638/zupc.geojson'
