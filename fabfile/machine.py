@@ -97,11 +97,12 @@ def install_redis():
             sudo('cp src/redis-cli /usr/bin/redis-cli')
             sudo('chown {0}:{0} /usr/bin/redis-cli'.format(env.user))
 
-
 def install_services():
     install_redis()
     install_krmt()
     run('rm -rf /tmp/redis')
+    if not files.exists('/etc/redis.conf'):
+        put('files/redis.conf', '/etc/', use_sudo=True)
     if not files.exists('/var/run/supervisor.sock'):
         sudo('supervisord -c /etc/supervisor/supervisord.conf')
     supervisor.reload_config()
@@ -109,14 +110,7 @@ def install_services():
 
 @task
 def restart_services():
-    command = 'redis-server --module-add /usr/lib/krmt/geo.so '
-    if 'redis_conf' in env.__dict__.keys():
-        put(env.local_redis_conf, 'redis/redis.conf')
-        redis_conf = run('readlink -f redis/redis.conf')
-        command += ' {}'.format(redis_conf)
-    else:
-        redis_port = re.search(r'redis://.*:.*@*.:(\d+)', env.conf_api.REDIS_URL).group(1)
-        command += ' --port {}'.format(redis_port)
+    command = 'redis-server /etc/redis.conf'
     require.files.directory('/var/log/redis', use_sudo=True, owner=env.user)
     require.files.file('/var/log/redis/error.log', owner=env.user, use_sudo=True)
     require.supervisor.process('redis', command=command,
