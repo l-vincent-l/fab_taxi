@@ -28,8 +28,8 @@ def import_contours():
     drop_table_communes(env.conf_api.SQLALCHEMY_DATABASE_URI, table_name)
     run(u'shp2pgsql {} > communes.sql'.format(table_name))
     run(u'psql {} -f communes.sql'.format(env.conf_api.SQLALCHEMY_DATABASE_URI))
-    run(u"""psql {} -c 'INSERT INTO \"ZUPC\" (nom, insee, shape)
-            SELECT nom, insee, geom FROM \"{}\";'
+    run(u"""psql {} -c 'INSERT INTO \"ZUPC\" (nom, insee, shape,active)
+            SELECT nom, insee, geom, false FROM \"{}\";'
             """.format(env.conf_api.SQLALCHEMY_DATABASE_URI, table_name))
     require.files.file('sql_update',
             contents="""UPDATE "ZUPC" SET departement_id = sub.id FROM
@@ -44,7 +44,7 @@ def import_zupc(import_='True'):
         for f in list_dir():
             if f == '*' or f.endswith('zip'):
                 continue
-            run('rm {}'.format(f))
+            run('rm -f {}'.format(f))
         if import_=='True':
             import_contours()
 
