@@ -50,9 +50,12 @@ def deploy_nginx_api_site(now):
     celery = path.join(env.apitaxi_venv_path(now), 'bin', 'celery')
 
     require.supervisor.process('send_hail_{}'.format(now),
-        command='APITAXI_CONFIG_FILE="{}" {} --app=celery_worker.celery -Q deployment_{}'.format(env.apitaxi_config_path(now), celery, now),
-        directory=env.apitaxi_venv_path(now),
+        command='{} worker --app=celery_worker.celery -Q send_hail_{} --workdir={}'.format(
+            celery, now, env.apitaxi_dir(now)),
+        directory=env.apitaxi_dir(now),
         stdout_logfile='/var/log/celery/send_hail.log',
+        user='www-data',
+        environment='APITAXI_CONFIG_FILE=prod_settings.py'
     )
 
     require.nginx.site('apitaxi',
