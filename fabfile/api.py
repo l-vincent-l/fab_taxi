@@ -58,6 +58,7 @@ def deploy_nginx_api_site(now):
     require.nginx.site('apitaxi',
         template_source='templates/nginx_site.conf',
         domain_name=getattr(env.conf_api, 'HOST', 'localhost'),
+        env='NOW={}'.format(now),
         port=getattr(env.conf_api, 'PORT', 80),
         socket=env.uwsgi_socket(now)
     )
