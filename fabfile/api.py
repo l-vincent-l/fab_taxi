@@ -65,7 +65,7 @@ def deploy_nginx_api_site(now):
 
 def clean_directories(now):
     l = run('for i in {}/deployment_*; do echo $i; done'.format(env.uwsgi_dir)).split("\n")
-    for d in l:
+    for d in [d.replace('\r', '') for d in l]:
         if not files.is_dir(d):
             continue
         if d == env.deployment_dir(now):
@@ -73,7 +73,7 @@ def clean_directories(now):
         files.remove(d, recursive=True)
 
     l = run('for i in {}/apitaxi_*; do echo $i; done'.format(env.uwsgi_socket_dir)).split("\n")
-    for f in l:
+    for f in [f.replace('\r', '') for f in l]:
         if not files.is_file(f):
             continue
         if f == env.uwsgi_socket(now):
@@ -85,13 +85,12 @@ def clean_directories(now):
 def stop_old_processes(now):
     def stop_process(name, visitor):
         l = run('for i in /etc/supervisor/conf.d/{}_*; do echo $i; done'.format(name)).split("\n")
-        for f in l:
+        for f in [f.replace('\r', '') for f in l]:
+            print 'To remove: {}'.format(f)
             if str(now) in f:
                 continue
-            m = re.search(r'([^/]*).conf$', f)
-            if not m:
-                continue
-            process = m.group(1)
+            file_ = f.split('/')[-1]
+            process = file_[:-len('.conf')]
             visitor(process)
             files.remove(f, use_sudo=True)
 
@@ -102,8 +101,7 @@ def stop_old_processes(now):
         for i in range(1, 17):
             run('python manage.py active_tasks {}'.format(process))
             time.sleep(i)
-        supervisor.stop_process(p)
-
+        supervisor.stop_process(process)
 
     with cd(env.apitaxi_dir(now)):
         with python.virtualenv(env.apitaxi_venv_path(now)),\
