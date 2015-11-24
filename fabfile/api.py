@@ -75,11 +75,9 @@ def clean_directories(now):
 
     l = run('for i in {}/apitaxi_*; do echo $i; done'.format(env.uwsgi_socket_dir)).split("\n")
     for f in [f.replace('\r', '') for f in l]:
-        if not files.is_file(f):
-            continue
         if f == env.uwsgi_socket(now):
             continue
-        files.remove(f)
+        files.remove(f, use_sudo=True)
     #The pid file should be remove when the process stops
 
 
