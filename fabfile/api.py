@@ -33,7 +33,8 @@ def deploy_nginx_api_site(now):
            'uwsgi_launcher_logdir': env.uwsgi_launcher_logdir,
            'socket': env.uwsgi_socket(now),
            'processes': env.wsgi_processes,
-           'threads': env.wsgi_threads
+           'threads': env.wsgi_threads,
+           'now': now
        }
     )
 
