@@ -22,7 +22,7 @@ def load_config_dev():
     env.uwsgi_dir = '/srv/www'
     env.deployment_dir = lambda now: env.uwsgi_dir + '/deployment_{}'.format(now)
 
-    env.wsgi_processes = 1
+    env.wsgi_processes = 8
     env.wsgi_threads = 10
     env.uwsgi_logdir = '/var/log/uwsgi'
     env.uwsgi_launcher_logdir = '/var/log/uwsgi_launcher'
@@ -54,7 +54,7 @@ def load_config_test():
     env.uwsgi_dir = '/srv/www'
     env.deployment_dir = lambda now: env.uwsgi_dir + '/deployment_{}'.format(now)
 
-    env.wsgi_processes = 1
+    env.wsgi_processes = 8
     env.wsgi_threads = 10
     env.uwsgi_logdir = '/var/log/uwsgi'
     env.uwsgi_launcher_logdir = '/var/log/uwsgi_launcher'
@@ -86,7 +86,7 @@ def load_config_prod():
     env.uwsgi_dir = '/srv/www'
     env.deployment_dir = lambda now: env.uwsgi_dir + '/deployment_{}'.format(now)
 
-    env.wsgi_processes = 1
+    env.wsgi_processes = 24
     env.wsgi_threads = 10
     env.uwsgi_logdir = '/var/log/uwsgi'
     env.uwsgi_launcher_logdir = '/var/log/uwsgi_launcher'
