@@ -8,6 +8,7 @@ from fabtools import supervisor
 from load_config import load_config
 from machine import install_machine, restart_services, install_system
 from geoserver import deploy_geoserver, restart_geotaxi
+from tuning import tune_system
 from api import deploy_api, clean_directories
 from zupc import import_zupc
 from dash import *
@@ -22,6 +23,7 @@ def deploy():
     install_machine()
     deploy_geoserver()
     supervisor.update_config()
+    tune_system()
     restart_services()
     restart_geotaxi()
     deploy_api()

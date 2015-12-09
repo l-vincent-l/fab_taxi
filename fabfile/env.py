@@ -31,6 +31,9 @@ def load_config_dev():
 
     env.server_name = 'dev.api.taxi'
 
+    env.somaxconn = 65535
+    env.tcp_max_syn_backlog = 65535
+
     env.uwsgi_socket_dir = '/var/run/uwsgi_socket'
     env.uwsgi_socket = lambda now: env.uwsgi_socket_dir + '/apitaxi_{}.sock'.format(now)
     env.postgres_locale = 'fr_FR.UTF-8'
@@ -60,6 +63,9 @@ def load_config_test():
 
     env.server_name = 'test.api.taxi'
 
+    env.somaxconn = 65535
+    env.tcp_max_syn_backlog = 65535
+
     env.uwsgi_socket_dir = '/var/run/uwsgi_socket'
     env.uwsgi_socket = lambda now: env.uwsgi_socket_dir + '/apitaxi_{}.sock'.format(now)
     env.postgres_locale = 'fr_FR.UTF-8'
@@ -88,6 +94,9 @@ def load_config_prod():
     env.uwsgi_pid_file = lambda now: '{}/uwsgi_{}.pid'.format(env.uwsgi_pid_dir, now)
 
     env.server_name = 'api.taxi'
+
+    env.somaxconn = 65535
+    env.tcp_max_syn_backlog = 65535
 
     env.uwsgi_socket_dir = '/var/run/uwsgi_socket'
     env.uwsgi_socket = lambda now: env.uwsgi_socket_dir + '/apitaxi_{}.sock'.format(now)
