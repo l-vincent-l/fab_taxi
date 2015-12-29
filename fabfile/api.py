@@ -113,12 +113,14 @@ def stop_old_processes(now):
 
 
 @task
-def deploy_api():
+def deploy_api(commit='master'):
     now = int(time.time())
     require.files.directory(env.deployment_dir(now))
     with cd(env.deployment_dir(now)):
-        run(u'wget {}'.format(env.apitaxi_archive))
-        run('unzip master.zip')
+        run(u'wget {}'.format(env.apitaxi_archive.format(commit)))
+        run('unzip {}.zip'.format(commit))
+        if commit != 'master':
+            run('mv APITaxi-{} APITaxi-master'.format(commit))
 
     with cd(env.apitaxi_dir(now)):
         require.python.virtualenv(env.apitaxi_venv_path(now))
