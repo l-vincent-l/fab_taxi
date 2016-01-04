@@ -74,7 +74,7 @@ def load_config_test():
     env.influx_conf = '/etc/opt/influxdb/influxdb.conf'
     env.influx_db_dir = '/var/influx'
     env.geoserver_port = 80
-    env.apitaxi_archive = u'https://github.com/openmaraude/APITaxi/archive/master.zip'
+    env.apitaxi_archive = u'https://github.com/openmaraude/APITaxi/archive/{}.zip'
     make_default_values()
 
 @task
@@ -106,7 +106,7 @@ def load_config_prod():
     env.influx_conf = '/etc/opt/influxdb/influxdb.conf'
     env.influx_db_dir = '/var/influx'
     env.geoserver_port = 80
-    env.apitaxi_archive = u'https://github.com/openmaraude/APITaxi/archive/master.zip'
+    env.apitaxi_archive = u'https://github.com/openmaraude/APITaxi/archive/{}.zip'
     make_default_values()
 
 
