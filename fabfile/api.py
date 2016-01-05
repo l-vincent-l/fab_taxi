@@ -49,10 +49,10 @@ def deploy_nginx_api_site(now):
     test_uwsgi_is_started(now)
 
     celery = path.join(env.apitaxi_venv_path(now), 'bin', 'celery')
-
-    require.supervisor.process('send_hail_{}'.format(now),
-        command='{} worker --app=celery_worker.celery -Q send_hail_{} --workdir={}'.format(
-            celery, now, env.apitaxi_dir(now)),
+    worker_name = 'send_hail_{}'.format(now)
+    command = '{} worker --app=celery_worker.celery -Q {} -n {} --workdir={}'
+    require.supervisor.process(worker_name,
+        command=command.format(celery, worker_name, worker_name, env.apitaxi_dir(now)),
         directory=env.apitaxi_dir(now),
         stdout_logfile='/var/log/celery/send_hail.log',
         user='www-data',
@@ -102,7 +102,9 @@ def stop_old_processes(now):
         #Request' status is failure after 15 secs in received
         #So even if queue is not empty we can shutdown the process
         for i in range(1, 17):
-            run('python manage.py active_tasks {}'.format(process))
+            res = run('python manage.py active_tasks {}'.format(process))
+            if res == '':
+                break
             time.sleep(1)
         supervisor.stop_process(process)
 
