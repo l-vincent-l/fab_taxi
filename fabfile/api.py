@@ -103,7 +103,7 @@ def stop_old_processes(now):
         #So even if queue is not empty we can shutdown the process
         for i in range(1, 17):
             run('python manage.py active_tasks {}'.format(process))
-            time.sleep(i)
+            time.sleep(1)
         supervisor.stop_process(process)
 
     with cd(env.apitaxi_dir(now)):
