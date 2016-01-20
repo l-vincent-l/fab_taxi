@@ -56,7 +56,7 @@ def create_db_influxdb():
 
 @task
 def restart_stats_workers():
-    celery = "{venv}/bin/celery".format(env.apitaxi_venv_path)
+    celery = "{venv}/bin/celery".format(venv=env.apitaxi_venv_path)
     require.supervisor.process('stat_beat',
         command="{celery} beat --app=celery_worker.celery".format(celery=celery),
         directory=env.apitaxi_venv_path,
