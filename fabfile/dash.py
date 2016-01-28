@@ -6,6 +6,11 @@ from influxdb.exceptions import InfluxDBClientError
 import time
 
 def install_influxdb():
+    data_dir = path.join(env.influx_db_dir, 'data')
+    meta_dir = path.join(env.influx_db_dir, 'meta')
+    hinted_dir = path.join(env.influx_db_dir, 'hinted')
+    require.files.directories([data_dir, meta_dir],
+            use_sudo=True, owner='influxdb')
     if files.is_file('/usr/bin/influxd'):
         return
     with cd('/tmp/'):
@@ -19,6 +24,8 @@ def install_influxdb():
             "CREATE USER {} WITH PASSWORD '{}' WITH ALL PRIVILEGES".format(
                 env.conf_api.INFLUXDB_USER, env.conf_api.INFLUXDB_PASSWORD)
         ))
+    run('influx -execute "CREATE DATABASE IF NOT EXISTS {}"'.format(
+        env.conf_api.INFLUXDB_TAXIS_DB))
 
 
 
@@ -27,8 +34,6 @@ def configure_influxdb():
     data_dir = path.join(env.influx_db_dir, 'data')
     meta_dir = path.join(env.influx_db_dir, 'meta')
     hinted_dir = path.join(env.influx_db_dir, 'hinted')
-    require.files.directories([data_dir, meta_dir],
-            use_sudo=True, owner='influxdb')
     tmp_conf_file = '/tmp/influx.conf'
     if files.is_file(tmp_conf_file):
         run('rm {}'.format(tmp_conf_file))
@@ -51,24 +56,6 @@ def restart_influxdb():
 @task
 def status_influxdb():
     sudo('service influxdb status')
-
-
-@task
-def create_db_influxdb():
-    for i in range(0, 10):
-        if service.is_running('influxdb'):
-            print 'InfluxDb is started'
-            break
-        require.service.start('influxdb')
-        time.sleep(1)
-    time.sleep(5)
-    str_influx_auth = 'influx -username={user} -password="{pass_}" -execute="{{}}"'.format(
-        user=env.conf_api.INFLUXDB_USER, pass_=env.conf_api.INFLUXDB_PASSWORD)
-    users = run(str_influx_auth.format("SHOW USERS"))
-    if 'Failed' in users:
-        raise ValueError(users)
-    run(str_influx_auth.format('CREATE DATABASE IF NOT EXISTS {}'.format(
-        env.conf_api.INFLUXDB_TAXIS_DB)))
 
 
 @task
@@ -100,5 +87,4 @@ def install_dash():
     install_influxdb()
     configure_influxdb()
     restart_influxdb()
-    create_db_influxdb()
     restart_stats_workers()
