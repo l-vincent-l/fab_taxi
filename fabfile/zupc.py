@@ -49,11 +49,11 @@ def import_zupc(import_='True'):
             import_contours()
 
     base_dir = ''
-    with cd(env.uwsgi_dir):
+    with cd(env.deploy_dir):
         for f in list_dir():
             if files.is_dir(f) and 'deployment' in f and f > base_dir:
                 base_dir = f
-    api_dir = env.uwsgi_dir+'/' + base_dir
+    api_dir = env.deploy_dir+'/' + base_dir
     with cd('/tmp/zupc'):
         wget(env.zupc_fichier)
     with python.virtualenv(base_dir + '/venvAPITaxi'), cd(base_dir+'/APITaxi-master'):
