@@ -19,8 +19,8 @@ def load_config_dev():
     env.user = 'deploy'
     env.use_ssh_config = True
 
-    env.uwsgi_dir = '/srv/www'
-    env.deployment_dir = lambda now: env.uwsgi_dir + '/deployment_{}'.format(now)
+    env.deploy_dir = '/srv/www'
+    env.deployment_dir = lambda now: env.deploy_dir + '/deployment_{}'.format(now)
 
     env.wsgi_processes = 8
     env.wsgi_threads = 10
@@ -39,7 +39,7 @@ def load_config_dev():
     env.postgres_locale = 'fr_FR.UTF-8'
     env.local_redis_conf = 'files/redis.conf'
 
-    env.influx_conf = '/etc/opt/influxdb/influxdb.conf'
+    env.influx_conf = '/etc/influxdb/influxdb.conf'
     env.influx_db_dir = '/var/influx'
     env.geoserver_port = 80
     env.apitaxi_archive = u'https://github.com/openmaraude/APITaxi/archive/{}.zip'
@@ -51,8 +51,8 @@ def load_config_test():
     env.user = 'deploy'
     env.use_ssh_config = True
 
-    env.uwsgi_dir = '/srv/www'
-    env.deployment_dir = lambda now: env.uwsgi_dir + '/deployment_{}'.format(now)
+    env.deploy_dir = '/srv/www'
+    env.deployment_dir = lambda now: env.deploy_dir + '/deployment_{}'.format(now)
 
     env.wsgi_processes = 8
     env.wsgi_threads = 10
@@ -71,7 +71,7 @@ def load_config_test():
     env.postgres_locale = 'fr_FR.UTF-8'
     env.local_redis_conf = 'files/redis.conf'
 
-    env.influx_conf = '/etc/opt/influxdb/influxdb.conf'
+    env.influx_conf = '/etc/influxdb/influxdb.conf'
     env.influx_db_dir = '/var/influx'
     env.geoserver_port = 80
     env.apitaxi_archive = u'https://github.com/openmaraude/APITaxi/archive/{}.zip'
@@ -83,8 +83,8 @@ def load_config_prod():
     env.user = 'deploy'
     env.use_ssh_config = True
 
-    env.uwsgi_dir = '/srv/www'
-    env.deployment_dir = lambda now: env.uwsgi_dir + '/deployment_{}'.format(now)
+    env.deploy_dir = '/srv/www'
+    env.deployment_dir = lambda now: env.deploy_dir + '/deployment_{}'.format(now)
 
     env.wsgi_processes = 24
     env.wsgi_threads = 10
@@ -103,7 +103,7 @@ def load_config_prod():
     env.postgres_locale = 'fr_FR.UTF-8'
     env.local_redis_conf = 'files/redis.conf'
 
-    env.influx_conf = '/etc/opt/influxdb/influxdb.conf'
+    env.influx_conf = '/etc/influxdb/influxdb.conf'
     env.influx_db_dir = '/var/influx'
     env.geoserver_port = 80
     env.apitaxi_archive = u'https://github.com/openmaraude/APITaxi/archive/{}.zip'
@@ -112,3 +112,4 @@ def load_config_prod():
 
 env.contours_fichier = u'http://osm13.openstreetmap.fr/~cquest/openfla/export/communes-20150101-5m-shp.zip'
 env.zupc_fichier = u'https://www.data.gouv.fr/s/resources/zones-uniques-de-prises-en-charge-des-taxis-zupc/20151023-174638/zupc.geojson'
+env.shell = '/bin/bash -l -i -c'
