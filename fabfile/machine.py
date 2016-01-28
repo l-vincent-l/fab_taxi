@@ -48,7 +48,8 @@ def install_dependencies():
         'build-essential', 'check', 'libspatialindex-dev', 'git',
         'libgcrypt11-dev', 'unzip', 'cmake', 'libpq-dev', 'python2.7-dev',
         'supervisor', 'locales', 'postgis', 'curl', 'libpcre3', 'libpcre3-dev',
-        'unzip','munin', 'libgeos-dev'])
+        'unzip','munin', 'libgeos-dev', 'libjpeg62-turbo-dev',
+        'libfreetype6', 'libfreetype6-dev'])
     install_postgres_postgis()
     require.nginx.server()
 
