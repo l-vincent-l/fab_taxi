@@ -69,7 +69,7 @@ def deploy_nginx_api_site(now):
 
 
 def clean_directories(now):
-    l = run('for i in {}/deployment_*; do echo $i; done'.format(env.uwsgi_dir)).split("\n")
+    l = run('for i in {}/deployment_*; do echo $i; done'.format(env.deploy_dir)).split("\n")
     for d in [d.replace('\r', '') for d in l]:
         if not files.is_dir(d):
             continue
