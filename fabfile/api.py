@@ -11,7 +11,7 @@ def test_uwsgi_is_started(now):
         status = supervisor.process_status('uwsgi_{}'.format(now))
         if status == 'RUNNING':
             break
-        time.sleep(i*0.1)
+        time.sleep(1)
     testing_file = '/tmp/test_uwsgi.py'
     if files.is_file(testing_file):
         files.remove(testing_file)
