@@ -125,7 +125,7 @@ def deploy_api(commit='master'):
     with cd(env.apitaxi_dir(now)):
         require.python.virtualenv(env.apitaxi_venv_path(now))
         with python.virtualenv(env.apitaxi_venv_path(now)):
-            python.install_pip()
+            python.install_pip(use_sudo=False)
             require.python.package('uwsgi')
             python.install_requirements('requirements.txt')
             put(environ['APITAXI_CONFIG_FILE'], env.apitaxi_config_path(now))
