@@ -9,6 +9,7 @@ def install_influxdb():
     data_dir = path.join(env.influx_db_dir, 'data')
     meta_dir = path.join(env.influx_db_dir, 'meta')
     hinted_dir = path.join(env.influx_db_dir, 'hinted')
+    require.users.user('influxdb')
     require.files.directories([data_dir, meta_dir],
             use_sudo=True, owner='influxdb')
     if files.is_file('/usr/bin/influxd'):
