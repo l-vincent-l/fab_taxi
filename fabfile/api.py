@@ -11,7 +11,7 @@ def test_uwsgi_is_started(now):
         status = supervisor.process_status('uwsgi_{}'.format(now))
         if status == 'RUNNING':
             break
-        time.sleep(i*0.1)
+        time.sleep(1)
     testing_file = '/tmp/test_uwsgi.py'
     if files.is_file(testing_file):
         files.remove(testing_file)
@@ -69,7 +69,7 @@ def deploy_nginx_api_site(now):
 
 
 def clean_directories(now):
-    l = run('for i in {}/deployment_*; do echo $i; done'.format(env.uwsgi_dir)).split("\n")
+    l = run('for i in {}/deployment_*; do echo $i; done'.format(env.deploy_dir)).split("\n")
     for d in [d.replace('\r', '') for d in l]:
         if not files.is_dir(d):
             continue
@@ -125,7 +125,7 @@ def deploy_api(commit='master'):
     with cd(env.apitaxi_dir(now)):
         require.python.virtualenv(env.apitaxi_venv_path(now))
         with python.virtualenv(env.apitaxi_venv_path(now)):
-            python.install_pip()
+            python.install_pip(use_sudo=False)
             require.python.package('uwsgi')
             python.install_requirements('requirements.txt')
             put(environ['APITAXI_CONFIG_FILE'], env.apitaxi_config_path(now))
