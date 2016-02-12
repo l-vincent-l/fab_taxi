@@ -13,6 +13,7 @@ def init_geotaxi():
 
 @task
 def install_geotaxi():
+    git.checkout('GeoTaxi')
     git.pull('GeoTaxi')
     with cd('GeoTaxi/src'):
         require.files.directory('obj')
