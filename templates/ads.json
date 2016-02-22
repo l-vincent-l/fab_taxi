@@ -1,0 +1,13 @@
+{
+  "data": [
+    {
+      "category": "string",
+      "doublage": true,
+      "insee": "999999",
+      "numero": "string",
+      "owner_name": "string",
+      "owner_type": "company",
+      "vehicle_id": %(vehicle_id)s
+    }
+  ]
+}

@@ -101,8 +101,7 @@ def install_services():
     install_redis()
     install_krmt()
     run('rm -rf /tmp/redis')
-    if not files.exists('/etc/redis.conf'):
-        put('files/redis.conf', '/etc/', use_sudo=True)
+    require.file('/etc/redis.conf', source='files/redis.conf', use_sudo=True)
     if not files.exists('/var/run/supervisor.sock'):
         sudo('supervisord -c /etc/supervisor/supervisord.conf')
     supervisor.reload_config()

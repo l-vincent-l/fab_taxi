@@ -5,7 +5,7 @@ from fabric.api import put, run, task, env
 from os import environ, path
 import time, re
 
-
+@task
 def test_uwsgi_is_started(now):
     for i in range(1, 30):
         status = supervisor.process_status('uwsgi_{}'.format(now))
@@ -17,8 +17,12 @@ def test_uwsgi_is_started(now):
         files.remove(testing_file)
     put('files/test_uwsgi.py', '/tmp/')
 
-    output = run('python {} {} {}'.format(testing_file, env.uwsgi_socket(now), env.server_name))
+    output = run('python {} {} {} aa'.format(testing_file, env.uwsgi_socket(now),
+        '{}/ads/'.format(env.server_name)))
     assert '"message"' in output
+
+    from test_api import test_api
+    test_api(testing_file, env.uwsgi_socket(now), env.server_name)
 
 
 def deploy_nginx_api_site(now):

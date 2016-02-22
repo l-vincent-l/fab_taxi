@@ -1,0 +1,18 @@
+{
+  "data": [
+    {
+      "ads": {
+        "insee": "999999",
+        "numero": "string"
+      },
+      "driver": {
+        "departement": "999",
+        "professional_licence": "testing_licence"
+      },
+      "status": "free",
+      "vehicle": {
+        "licence_plate": "testing_uwsgi"
+      }
+    }
+  ]
+}
