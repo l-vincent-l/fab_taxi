@@ -20,7 +20,6 @@
       "gps": true,
       "horodateur": "string",
       "horse_power": 0,
-      "id": 0,
       "licence_plate": "testing_uwsgi",
       "luxury": true,
       "model": "string",
