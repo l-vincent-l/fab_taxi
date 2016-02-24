@@ -108,11 +108,20 @@ def add_departement_zupc():
     put('files/add_departement_zupc.sql', remote_file)
     run('psql -f {} {}'.format(remote_file, env.conf_api.SQLALCHEMY_DATABASE_URI,))
 
+
+def delete_testing_objects(taxi_id):
+    remote_file = '/tmp/delete_testing_objects.sql'
+    files.upload_template('templates/delete_testing_objects.sql',
+            remote_file, context={"taxi_id": taxi_id})
+    run('psql -f {} {}'.format(remote_file,
+        env.conf_api.SQLALCHEMY_DATABASE_URI))
+
+
 @task
 def test_api(testing_file, socket, server_name):
     add_departement_zupc()
     def curl(*v):
-        command = 'python {} {} {} {}'.format(testing_file, socket, 
+        command = 'python {} {} "{}" {}'.format(testing_file, socket, 
                 server_name+v[0], " ".join(v[1:]))
         return run(command).split(u'\r\r\n\r\r\n', 1)
     vehicle_id = test_add_vehicle(curl)
@@ -122,3 +131,4 @@ def test_api(testing_file, socket, server_name):
     send_position_taxi(taxi_id)
     test_get_taxi(curl, taxi_id)
     test_get_taxis(curl, taxi_id)
+    delete_testing_objects(taxi_id)
