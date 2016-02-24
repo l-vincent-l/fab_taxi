@@ -73,8 +73,11 @@ def test_add_taxi(curl):
 def send_position_taxi(taxi_id):
     remote_file = '/tmp/send_position_taxi.py'
     put('files/send_position_taxi.py', remote_file)
-    run('python {} {} {} {}'.format(remote_file, taxi_id,
-        env.conf_api.TESTING_APIKEY_OPERATEUR, env.geoserver_port))
+    operator = run('psql -c "SELECT email FROM \\""user\\"" WHERE apikey=\'{}\';" {}'\
+            .format(env.conf_api.TESTING_APIKEY_OPERATEUR,
+        env.conf_api.SQLALCHEMY_DATABASE_URI)).split('\n')[2].strip()
+    run('python {} {} {} {} {}'.format(remote_file, taxi_id,
+        env.conf_api.TESTING_APIKEY_OPERATEUR, env.geoserver_port, operator))
 
 
 def test_get_taxi(curl, taxi_id):

@@ -2,7 +2,7 @@ import time, socket, json, sys, hashlib
 if __name__ == '__main__':
     payload = {
         "timestamp": str(int(time.time())),
-        "operator":"neotaxi",
+        "operator": sys.argv[4],
         "taxi": sys.argv[1],
         "lat":"0.1",
         "lon":"0.1",
