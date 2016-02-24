@@ -60,9 +60,10 @@ def status_influxdb():
 
 
 @task
-def restart_stats_workers():
+def restart_stats_workers(now=None):
     l = run('for i in {}/deployment_*; do echo $i; done'.format(env.deploy_dir)).split("\n")
-    now = int(sorted(l)[-1].split('_')[-1])
+    if not now:
+        now = int(sorted(l)[-1].split('_')[-1])
     celery = path.join(env.apitaxi_venv_path(now), 'bin', 'celery')
     commandline = '{} {{command}} --app=celery_worker.celery --workdir={} --pidfile={}'
     commandline = commandline.format(celery, env.apitaxi_dir(now),

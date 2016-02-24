@@ -4,6 +4,7 @@ from fabric.context_managers import cd, shell_env
 from fabric.api import put, run, task, env
 from os import environ, path
 import time, re
+from .dash import restart_stats_workers
 
 @task
 def test_uwsgi_is_started(now):
@@ -142,3 +143,4 @@ def deploy_api(commit='master'):
         service.start('nginx')
     clean_directories(now)
     stop_old_processes(now)
+    restart_stats_workers(now)
