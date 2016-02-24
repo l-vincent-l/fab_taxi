@@ -1,0 +1,38 @@
+{
+  "data": [
+    {
+      "air_con": true,
+      "amex_accepted": true,
+      "baby_seat": true,
+      "bank_check_accepted": true,
+      "bike_accepted": true,
+      "color": "string",
+      "constructor": "string",
+      "cpam_conventionne": true,
+      "credit_card_accepted": true,
+      "date_dernier_ct": "2016-02-22",
+      "date_validite_ct": "2016-02-22",
+      "dvd_player": true,
+      "electronic_toll": true,
+      "engine": "string",
+      "every_destination": true,
+      "fresh_drink": true,
+      "gps": true,
+      "horodateur": "string",
+      "horse_power": 0,
+      "licence_plate": "testing_uwsgi",
+      "luxury": true,
+      "model": "string",
+      "model_year": 0,
+      "nb_seats": 0,
+      "nfc_cc_accepted": true,
+      "pet_accepted": true,
+      "relais": true,
+      "special_need_vehicle": true,
+      "tablet": true,
+      "taximetre": "string",
+      "type_": "sedan",
+      "wifi": true
+    }
+  ]
+}

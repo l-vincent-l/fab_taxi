@@ -1,11 +1,10 @@
-import sys, socket
-
+#!/usr/bin/python
+import sys, socket, json, six
 
 def sz(x):
     s = hex(x if isinstance(x, int) else len(x))[2:].rjust(4, '0')
     s = bytes.fromhex(s) if sys.version_info[0] == 3 else s.decode('hex')
     return s[::-1]
-
 
 def pack_uwsgi_vars(var):
     pk = b''
@@ -20,10 +19,14 @@ def get_host_from_url(url):
     return (host, url)
 
 
-def ask_uwsgi(addr_and_port, var):
+def ask_uwsgi(socket_file, var, content=None):
     s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    s.connect(addr_and_port)
-    s.send(pack_uwsgi_vars(var)+ 'Accept:application/json'.encode('utf8'))
+    s.connect(socket_file)
+    to_send = pack_uwsgi_vars(var)
+    if content:
+        to_send += content.encode('utf8')
+    s.send(to_send)
+
     response = []
     while 1:
         data = s.recv(4096)
@@ -34,18 +37,30 @@ def ask_uwsgi(addr_and_port, var):
     return b''.join(response).decode('utf8')
 
 
-def curl(addr_and_port, host):
+def curl(socket_file, url, apikey, method='GET', content=None):
+    host, uri = get_host_from_url(url)
+    path, _, qs = uri.partition('?')
     var = {
         'SERVER_PROTOCOL': 'HTTP/1.1',
-        'REQUEST_METHOD': 'GET',
-        'PATH_INFO': '/ads/',
-	'REQUEST_URI': '/ads/',
+        'REQUEST_METHOD': method,
+        'PATH_INFO': path,
+	'REQUEST_URI': uri,
         'SERVER_NAME': host,
         'HTTP_HOST': host,
+        'QUERY_STRING': qs,
 	'HTTP_ACCEPT': 'application/json',
+        'HTTP_X_VERSION': '2',
+        'HTTP_X_API_KEY': apikey,
     }
-    return ask_uwsgi(addr_and_port, var)
+    if content:
+        if not isinstance(content, six.string_types):
+            content = json.dumps(content)
+        if content.startswith('@'):
+            content = open(content[1:], 'rb').read()
+        var['CONTENT_LENGTH'] = str(len(content))
+        var['CONTENT_TYPE'] = 'application/json'
+    return ask_uwsgi(socket_file, var, content)
 
 if __name__ == '__main__':
-    print curl(sys.argv[1], sys.argv[2])
+    print curl(*sys.argv[1:])
 

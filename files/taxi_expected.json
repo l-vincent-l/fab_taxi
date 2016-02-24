@@ -1,0 +1,32 @@
+{
+    "data": [
+        {
+            "ads": {
+                "insee": "999999", 
+                "numero": "string"
+            }, 
+            "crowfly_distance": null, 
+            "driver": {
+                "departement": "999", 
+                "professional_licence": "testing_licence"
+            }, 
+            "last_update": null, 
+            "operator": null, 
+            "position": {
+                "lat": null, 
+                "lon": null
+            }, 
+            "rating": 4.5, 
+            "status": "free", 
+            "vehicle": {
+                "characteristics": null, 
+                "color": null, 
+                "constructor": null, 
+                "licence_plate": "testing_uwsgi", 
+                "model": "string", 
+                "nb_seats": null
+            },
+            "operator": null
+        }
+    ]
+}
