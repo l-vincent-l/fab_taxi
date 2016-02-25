@@ -26,6 +26,16 @@ def test_uwsgi_is_started(now):
     test_api(testing_file, env.uwsgi_socket(now), env.server_name)
 
 
+def install_swagger_ui():
+    with cd('~'):
+        if not files.exists('APITaxi_swagger'):
+            git.clone('https://github.com/openmaraude/APITaxi_swagger')
+        git.checkout('APITaxi_swagger')
+        git.pull('APITaxi_swagger')
+        return path.join(run('pwd'), 'APITaxi_swagger')
+
+
+
 def deploy_nginx_api_site(now):
     files.upload_template('templates/uwsgi.ini',  env.uwsgi_config_path(now),
         context={
@@ -64,12 +74,15 @@ def deploy_nginx_api_site(now):
         environment='APITAXI_CONFIG_FILE=prod_settings.py'
     )
 
+    swagger_dir = install_swagger_ui()
+
     require.nginx.site('apitaxi',
         template_source='templates/nginx_site.conf',
         domain_name=getattr(env.conf_api, 'HOST', 'localhost'),
         env='NOW={}'.format(now),
         port=getattr(env.conf_api, 'PORT', 80),
-        socket=env.uwsgi_socket(now)
+        socket=env.uwsgi_socket(now),
+        doc_dir=swagger_dir
     )
 
 
