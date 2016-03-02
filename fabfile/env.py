@@ -46,6 +46,11 @@ def load_config_dev():
     make_default_values()
 
 @task
+def load_config_local():
+    env.hosts = ['127.0.0.1:2223']
+    env.server_name = 'localhost'
+
+@task
 def load_config_test():
     env.hosts = ['test.api.taxi']
     env.user = 'deploy'
