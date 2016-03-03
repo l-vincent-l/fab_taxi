@@ -5,7 +5,7 @@ from fabric.api import put, run, task, env
 from os import environ, path
 import time, re
 from .dash import restart_stats_workers
-
+from getpass import getpass
 @task
 def test_uwsgi_is_started(now):
     for i in range(1, 30):
@@ -131,6 +131,15 @@ def stop_old_processes(now):
              shell_env(APITAXI_CONFIG_FILE=env.apitaxi_config_path(now)):
             stop_process('send_hail', stop_queues)
 
+def get_admin_key():
+    return run(
+            """psql {} -tAc 'SELECT apikey FROM "user" where email='"'"'admin'"'"';'"""\
+                    .format(env.conf_api.SQLALCHEMY_DATABASE_URI))
+
+def install_admin_user(now):
+    if len(get_admin_key()) > 0:
+        return
+    run('python manage.py create_admin admin')
 
 @task
 def deploy_api(commit='master'):
@@ -151,6 +160,7 @@ def deploy_api(commit='master'):
             put(environ['APITAXI_CONFIG_FILE'], env.apitaxi_config_path(now))
             with shell_env(APITAXI_CONFIG_FILE=env.apitaxi_config_path(now)):
                 run('python manage.py db upgrade')
+                install_admin_user(now)
         deploy_nginx_api_site(now)
     if not service.is_running('nginx'):
         service.start('nginx')
