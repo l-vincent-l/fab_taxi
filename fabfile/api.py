@@ -5,7 +5,7 @@ from fabric.api import put, run, task, env
 from os import environ, path
 import time, re
 from .dash import restart_stats_workers
-from getpass import getpass
+
 @task
 def test_uwsgi_is_started(now):
     for i in range(1, 30):
@@ -18,12 +18,12 @@ def test_uwsgi_is_started(now):
         files.remove(testing_file)
     put('files/test_uwsgi.py', '/tmp/')
 
-    output = run('python {} {} {} aa'.format(testing_file, env.uwsgi_socket(now),
+    output = run('python {} {} {} aa'.format(testing_file, env.uwsgi_socket_api(now),
         '{}/ads/'.format(env.server_name)))
     assert '"message"' in output
 
     from test_api import test_api
-    test_api(testing_file, env.uwsgi_socket(now), env.server_name)
+    test_api(testing_file, env.uwsgi_socket_api(now), env.server_name)
 
 
 def install_swagger_ui():
@@ -37,16 +37,33 @@ def install_swagger_ui():
 
 
 def deploy_nginx_api_site(now):
-    files.upload_template('templates/uwsgi.ini',  env.uwsgi_config_path(now),
+    files.upload_template('templates/uwsgi.ini',  env.uwsgi_api_config_path(now),
         context={
            'config_path': env.apitaxi_config_path(now),
            'api_path': env.apitaxi_dir(now),
            'venv_path': env.apitaxi_venv_path(now),
-           'uwsgi_file': env.uwsgi_file(now),
-           'uwsgi_pid_file': env.uwsgi_pid_file(now),
-           'uwsgi_log_dir': env.uwsgi_logdir,
+           'uwsgi_file': env.uwsgi_api_file(now),
+           'uwsgi_pid_file': env.uwsgi_api_pid_file(now),
+           'uwsgi_log_file1': env.uwsgi_logdir + '/api_launcher.log',
+           'uwsgi_log_file2': env.uwsgi_logdir + '/api_uwsgi.log',
            'uwsgi_launcher_logdir': env.uwsgi_launcher_logdir,
-           'socket': env.uwsgi_socket(now),
+           'socket': env.uwsgi_socket_api(now),
+           'processes': env.wsgi_processes,
+           'threads': env.wsgi_threads,
+           'now': now
+       }
+    )
+
+    files.upload_template('templates/uwsgi.ini',  env.uwsgi_front_config_path(now),
+        context={
+           'config_path': env.fronttaxi_config_path(now),
+           'api_path': env.fronttaxi_dir(now),
+           'venv_path': env.apitaxi_venv_path(now),
+           'uwsgi_file': env.uwsgi_front_file(now),
+           'uwsgi_pid_file': env.uwsgi_front_pid_file(now),
+           'uwsgi_log_file1': env.uwsgi_logdir + '/front_launcher.log',
+           'uwsgi_log_file2': env.uwsgi_logdir + '/front_uwsgi.log',
+           'socket': env.uwsgi_socket_front(now),
            'processes': env.wsgi_processes,
            'threads': env.wsgi_threads,
            'now': now
@@ -54,10 +71,17 @@ def deploy_nginx_api_site(now):
     )
 
     uwsgi = path.join(env.apitaxi_venv_path(now), 'bin', 'uwsgi')
-    require.supervisor.process('uwsgi_{}'.format(now),
-        command='{} --ini {}'.format(uwsgi, env.uwsgi_config_path(now)),
+    require.supervisor.process('uwsgi_api_{}'.format(now),
+        command='{} --ini {}'.format(uwsgi, env.uwsgi_api_config_path(now)),
         directory=env.apitaxi_venv_path(now),
         stdout_logfile = '/var/log/nginx/apitaxi.log',
+        user='www-data'
+    )
+
+    require.supervisor.process('uwsgi_front_{}'.format(now),
+        command='{} --ini {}'.format(uwsgi, env.uwsgi_front_config_path(now)),
+        directory=env.apitaxi_venv_path(now),
+        stdout_logfile = '/var/log/nginx/fronttaxi.log',
         user='www-data'
     )
 
@@ -81,7 +105,8 @@ def deploy_nginx_api_site(now):
         domain_name=getattr(env.conf_api, 'HOST', 'localhost'),
         env='NOW={}'.format(now),
         port=getattr(env.conf_api, 'PORT', 80),
-        socket=env.uwsgi_socket(now),
+        socket_api=env.uwsgi_socket_api(now),
+        socket_front=env.uwsgi_socket_front(now),
         doc_dir=swagger_dir
     )
 
@@ -97,7 +122,7 @@ def clean_directories(now):
 
     l = run('for i in {}/apitaxi_*; do echo $i; done'.format(env.uwsgi_socket_dir)).split("\n")
     for f in [f.replace('\r', '') for f in l]:
-        if f == env.uwsgi_socket(now):
+        if f == env.uwsgi_socket_api(now):
             continue
         files.remove(f, use_sudo=True)
     #The pid file should be remove when the process stops
@@ -131,6 +156,17 @@ def stop_old_processes(now):
              shell_env(APITAXI_CONFIG_FILE=env.apitaxi_config_path(now)):
             stop_process('send_hail', stop_queues)
 
+def deploy_front(now):
+    with cd(env.deployment_dir(now)):
+        run(u'wget {} -O front.zip'.format(env.fronttaxi_archive))
+        run('unzip front.zip')
+    with cd(env.fronttaxi_dir(now)), python.virtualenv(env.apitaxi_venv_path(now)):
+        #python.install_requirements('requirements.txt')
+        put(environ['APITAXI_CONFIG_FILE'], env.fronttaxi_config_path(now))
+
+
+
+
 def get_admin_key():
     return run(
             """psql {} -tAc 'SELECT apikey FROM "user" where email='"'"'admin'"'"';'"""\
@@ -161,6 +197,7 @@ def deploy_api(commit='master'):
             with shell_env(APITAXI_CONFIG_FILE=env.apitaxi_config_path(now)):
                 run('python manage.py db upgrade')
                 install_admin_user(now)
+        deploy_front(now)
         deploy_nginx_api_site(now)
     if not service.is_running('nginx'):
         service.start('nginx')
