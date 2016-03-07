@@ -19,11 +19,11 @@ def test_uwsgi_is_started(now):
     put('files/test_uwsgi.py', '/tmp/')
 
     output = run('python {} {} {} aa'.format(testing_file, env.uwsgi_socket_api(now),
-        '{}/ads/'.format(env.server_name)))
+        '{}/ads/'.format(env.conf_api.SERVER_NAME)))
     assert '"message"' in output
 
     from test_api import test_api
-    test_api(testing_file, env.uwsgi_socket_api(now), env.server_name)
+    test_api(testing_file, env.uwsgi_socket_api(now), env.conf_api.SERVER_NAME)
 
 
 def install_swagger_ui():
