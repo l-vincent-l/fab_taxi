@@ -10,6 +10,7 @@ import re
 def install_system():
     deploy_user = env.user
     env.user = 'root'
+    run('apt-get update')
     require.deb.package('sudo')
     password = prompt('{} password:'.format(deploy_user))
     require.users.user(deploy_user, password=password)
