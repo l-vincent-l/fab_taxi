@@ -4,14 +4,22 @@ from fabric.api import env, task
 def make_default_values():
     if not hasattr(env, 'apitaxi_dir'):
         env.apitaxi_dir = lambda now: env.deployment_dir(now) + '/APITaxi-master'
-    if not hasattr(env, 'uwsgi_config_path'):
-        env.uwsgi_config_path = lambda now: env.apitaxi_dir(now) + '/uwsgi.ini'
-    if not hasattr(env, 'uwsgi_file'):
-        env.uwsgi_file = lambda now: env.apitaxi_dir(now) + '/api_taxi.uwsgi'
+    if not hasattr(env, 'fronttaxi_dir'):
+        env.fronttaxi_dir = lambda now: env.deployment_dir(now) + '/APITaxi_front-master'
+    if not hasattr(env, 'uwsgi_api_config_path'):
+        env.uwsgi_api_config_path = lambda now: env.apitaxi_dir(now) + '/uwsgi_api.ini'
+    if not hasattr(env, 'uwsgi_front_config_path'):
+        env.uwsgi_front_config_path = lambda now: env.fronttaxi_dir(now) + '/uwsgi_front.ini'
+    if not hasattr(env, 'uwsgi_api_file'):
+        env.uwsgi_api_file = lambda now: env.apitaxi_dir(now) + '/api_taxi.uwsgi'
+    if not hasattr(env, 'uwsgi_front_file'):
+        env.uwsgi_front_file = lambda now: env.fronttaxi_dir(now) + '/front_taxi.uwsgi'
     if not hasattr(env, 'apitaxi_venv_path'):
         env.apitaxi_venv_path = lambda now: env.deployment_dir(now) + '/venvAPITaxi'
     if not hasattr(env, 'apitaxi_config_path'):
         env.apitaxi_config_path = lambda now: env.apitaxi_dir(now) + '/APITaxi/prod_settings.py'
+    if not hasattr(env, 'fronttaxi_config_path'):
+        env.fronttaxi_config_path = lambda now: env.fronttaxi_dir(now) + '/APITaxi_front/prod_settings.py'
 
 @task
 def load_config_dev():
@@ -27,7 +35,8 @@ def load_config_dev():
     env.uwsgi_logdir = '/var/log/uwsgi'
     env.uwsgi_launcher_logdir = '/var/log/uwsgi_launcher'
     env.uwsgi_pid_dir = '/var/run/uwsgi'
-    env.uwsgi_pid_file = lambda now: '{}/uwsgi_{}.pid'.format(env.uwsgi_pid_dir, now)
+    env.uwsgi_api_pid_file = lambda now: '{}/uwsgi_api_{}.pid'.format(env.uwsgi_pid_dir, now)
+    env.uwsgi_front_pid_file = lambda now: '{}/uwsgi_front_{}.pid'.format(env.uwsgi_pid_dir, now)
 
     env.server_name = 'dev.api.taxi'
 
@@ -35,7 +44,8 @@ def load_config_dev():
     env.tcp_max_syn_backlog = 65535
 
     env.uwsgi_socket_dir = '/var/run/uwsgi_socket'
-    env.uwsgi_socket = lambda now: env.uwsgi_socket_dir + '/apitaxi_{}.sock'.format(now)
+    env.uwsgi_socket_api = lambda now: env.uwsgi_socket_dir + '/apitaxi_{}.sock'.format(now)
+    env.uwsgi_socket_front = lambda now: env.uwsgi_socket_dir + '/fronttaxi_{}.sock'.format(now)
     env.postgres_locale = 'fr_FR.UTF-8'
     env.local_redis_conf = 'files/redis.conf'
 
@@ -43,7 +53,13 @@ def load_config_dev():
     env.influx_db_dir = '/var/influx'
     env.geoserver_port = 80
     env.apitaxi_archive = u'https://github.com/openmaraude/APITaxi/archive/{}.zip'
+    env.fronttaxi_archive = u'https://github.com/openmaraude/APITaxi_front/archive/master.zip'
     make_default_values()
+
+@task
+def load_config_local():
+    env.hosts = ['127.0.0.1:2223']
+    env.server_name = 'localhost'
 
 @task
 def load_config_test():
