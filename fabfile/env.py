@@ -75,7 +75,8 @@ def load_config_test():
     env.uwsgi_logdir = '/var/log/uwsgi'
     env.uwsgi_launcher_logdir = '/var/log/uwsgi_launcher'
     env.uwsgi_pid_dir = '/var/run/uwsgi'
-    env.uwsgi_pid_file = lambda now: '{}/uwsgi_{}.pid'.format(env.uwsgi_pid_dir, now)
+    env.uwsgi_api_pid_file = lambda now: '{}/uwsgi_api_{}.pid'.format(env.uwsgi_pid_dir, now)
+    env.uwsgi_front_pid_file = lambda now: '{}/uwsgi_front_{}.pid'.format(env.uwsgi_pid_dir, now)
 
     env.server_name = 'test.api.taxi'
 
@@ -83,7 +84,8 @@ def load_config_test():
     env.tcp_max_syn_backlog = 65535
 
     env.uwsgi_socket_dir = '/var/run/uwsgi_socket'
-    env.uwsgi_socket = lambda now: env.uwsgi_socket_dir + '/apitaxi_{}.sock'.format(now)
+    env.uwsgi_socket_api = lambda now: env.uwsgi_socket_dir + '/apitaxi_{}.sock'.format(now)
+    env.uwsgi_socket_front = lambda now: env.uwsgi_socket_dir + '/fronttaxi_{}.sock'.format(now)
     env.postgres_locale = 'fr_FR.UTF-8'
     env.local_redis_conf = 'files/redis.conf'
 
@@ -91,6 +93,7 @@ def load_config_test():
     env.influx_db_dir = '/var/influx'
     env.geoserver_port = 80
     env.apitaxi_archive = u'https://github.com/openmaraude/APITaxi/archive/{}.zip'
+    env.fronttaxi_archive = u'https://github.com/openmaraude/APITaxi_front/archive/master.zip'
     make_default_values()
 
 @task
@@ -107,7 +110,8 @@ def load_config_prod():
     env.uwsgi_logdir = '/var/log/uwsgi'
     env.uwsgi_launcher_logdir = '/var/log/uwsgi_launcher'
     env.uwsgi_pid_dir = '/var/run/uwsgi'
-    env.uwsgi_pid_file = lambda now: '{}/uwsgi_{}.pid'.format(env.uwsgi_pid_dir, now)
+    env.uwsgi_api_pid_file = lambda now: '{}/uwsgi_api_{}.pid'.format(env.uwsgi_pid_dir, now)
+    env.uwsgi_front_pid_file = lambda now: '{}/uwsgi_front_{}.pid'.format(env.uwsgi_pid_dir, now)
 
     env.server_name = 'api.taxi'
 
@@ -123,6 +127,7 @@ def load_config_prod():
     env.influx_db_dir = '/var/influx'
     env.geoserver_port = 80
     env.apitaxi_archive = u'https://github.com/openmaraude/APITaxi/archive/{}.zip'
+    env.fronttaxi_archive = u'https://github.com/openmaraude/APITaxi_front/archive/master.zip'
     make_default_values()
 
 
