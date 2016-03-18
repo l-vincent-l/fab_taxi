@@ -195,6 +195,10 @@ def deploy_api(commit='master'):
             python.install_requirements('requirements.txt')
             put(environ['APITAXI_CONFIG_FILE'], env.apitaxi_config_path(now))
             with shell_env(APITAXI_CONFIG_FILE=env.apitaxi_config_path(now)):
+                for i in range(1, 30):
+                    if service.is_running('supervisor'):
+                        break
+                    time.sleep(1)
                 run('python manage.py db upgrade')
                 install_admin_user(now)
         deploy_front(now)
