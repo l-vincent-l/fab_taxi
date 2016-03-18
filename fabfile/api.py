@@ -1,6 +1,5 @@
 #coding: utf-8
 from fabtools import require, git, python, nginx, supervisor, service, files
-from fabtools.require import python
 from fabric.context_managers import cd, shell_env
 from fabric.api import put, run, task, env
 from os import environ, path
@@ -19,8 +18,8 @@ def test_uwsgi_is_started(now):
         files.remove(testing_file)
     put('files/test_uwsgi.py', '/tmp/')
 
-    python.package('six')
-    python.package('json')
+    require.python.package('six')
+    require.python.package('json')
     output = run('python {} {} {} aa'.format(testing_file, env.uwsgi_socket_api(now),
         '{}/ads/'.format(env.conf_api.SERVER_NAME)))
     assert '"message"' in output
