@@ -15,7 +15,7 @@ def init_geotaxi():
 def install_geotaxi():
     git.checkout('GeoTaxi')
     git.pull('GeoTaxi')
-    with cd('GeoTaxi/src'):
+    with cd('GeoTaxi'):
         require.files.directory('obj')
         run('make')
 
