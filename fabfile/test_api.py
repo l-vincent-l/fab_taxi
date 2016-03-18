@@ -1,6 +1,7 @@
 #coding: utf-8
 from fabric.api import task, put, env, run, sudo
 from fabric.contrib import files
+from fabric.require import python
 import tempfile, json
 from jsondiff import diff
 from .api import get_admin_key
@@ -112,6 +113,8 @@ def delete_testing_objects(taxi_id):
 @task
 def test_api(testing_file, socket, server_name):
     add_departement_zupc()
+    python.package('six')
+    python.package('json')
     def curl(*v):
         command = 'python {} {} "{}" {}'.format(testing_file, socket, 
                 server_name+v[0], " ".join(v[1:]))
