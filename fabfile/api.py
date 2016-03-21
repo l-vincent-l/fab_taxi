@@ -19,7 +19,6 @@ def test_uwsgi_is_started(now):
     put('files/test_uwsgi.py', '/tmp/')
 
     require.python.package('six', use_sudo=True)
-    require.python.package('json', use_sudo=True)
     output = run('python {} {} {} aa'.format(testing_file, env.uwsgi_socket_api(now),
         '{}/ads/'.format(env.conf_api.SERVER_NAME)))
     assert '"message"' in output
