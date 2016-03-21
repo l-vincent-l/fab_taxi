@@ -1,7 +1,7 @@
 #coding: utf-8
 from fabric.api import task, put, env, run, sudo
 from fabric.contrib import files
-from fabric.require import python
+from fabtools.require import python
 import tempfile, json
 from jsondiff import diff
 from .api import get_admin_key
