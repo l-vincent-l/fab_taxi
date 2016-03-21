@@ -113,8 +113,6 @@ def delete_testing_objects(taxi_id):
 @task
 def test_api(testing_file, socket, server_name):
     add_departement_zupc()
-    python.package('six')
-    python.package('json')
     def curl(*v):
         command = 'python {} {} "{}" {}'.format(testing_file, socket, 
                 server_name+v[0], " ".join(v[1:]))
