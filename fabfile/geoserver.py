@@ -13,6 +13,7 @@ def init_geotaxi():
 
 @task
 def install_geotaxi():
+    require.deb.packages(['libhiredis-dev'])
     git.checkout('GeoTaxi')
     git.pull('GeoTaxi')
     with cd('GeoTaxi'):
