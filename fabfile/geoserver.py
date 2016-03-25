@@ -21,12 +21,18 @@ def install_geotaxi():
         run('make')
 
 @task
-def restart_geotaxi():
+def install_process_geotaxi():
     program = run('readlink -f GeoTaxi/geoloc-server')
     require.supervisor.process('geotaxi',
             command='{} {}'.format(program, env.geoserver_port))
 
+@task
+def restart_geotaxi():
+    supervisor.update_config()
+    supervisor.restart_process('geotaxi')
 
 @task
 def deploy_geoserver():
     init_geotaxi()
+    install_process_geotaxi()
+    restart_geotaxi()
