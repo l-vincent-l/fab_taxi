@@ -68,11 +68,11 @@ def test_add_taxi(curl, apikey):
     except_id_added(expected, data)
     return json.loads(data)['data'][0]['id']
 
-def send_position_taxi(taxi_id):
+def send_position_taxi(taxi_id, apikey):
     remote_file = '/tmp/send_position_taxi.py'
     put('files/send_position_taxi.py', remote_file)
     run('python {} {} {} {} {}'.format(remote_file, taxi_id,
-        env.conf_api.TESTING_APIKEY_OPERATEUR, env.geoserver_port, 'admin'))
+        apikey, env.geoserver_port, 'admin'))
 
 
 def test_get_taxi(curl, apikey, taxi_id):
@@ -122,7 +122,7 @@ def test_api(testing_file, socket, server_name):
     test_add_ads(curl, apikey, vehicle_id)
     test_add_driver(curl, apikey)
     taxi_id = test_add_taxi(curl, apikey)
-    send_position_taxi(taxi_id)
+    send_position_taxi(taxi_id, apikey)
     test_get_taxi(curl, apikey, taxi_id)
     test_get_taxis(curl, apikey, taxi_id)
     delete_testing_objects(taxi_id)
