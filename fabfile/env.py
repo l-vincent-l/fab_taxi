@@ -119,7 +119,8 @@ def load_config_prod():
     env.tcp_max_syn_backlog = 65535
 
     env.uwsgi_socket_dir = '/var/run/uwsgi_socket'
-    env.uwsgi_socket = lambda now: env.uwsgi_socket_dir + '/apitaxi_{}.sock'.format(now)
+    env.uwsgi_socket_api = lambda now: env.uwsgi_socket_dir + '/apitaxi_{}.sock'.format(now)
+    env.uwsgi_socket_front = lambda now: env.uwsgi_socket_dir + '/fronttaxi_{}.sock'.format(now)
     env.postgres_locale = 'fr_FR.UTF-8'
     env.local_redis_conf = 'files/redis.conf'
 
