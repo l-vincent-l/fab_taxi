@@ -162,7 +162,7 @@ def deploy_front(now):
         run(u'wget {} -O front.zip'.format(env.fronttaxi_archive))
         run('unzip front.zip')
     with cd(env.fronttaxi_dir(now)), python.virtualenv(env.apitaxi_venv_path(now)):
-        #python.install_requirements('requirements.txt')
+        python.install_requirements('requirements.txt')
         put(environ['APITAXI_CONFIG_FILE'], env.fronttaxi_config_path(now))
 
 
