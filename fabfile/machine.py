@@ -57,41 +57,15 @@ def install_dependencies():
 def add_users():
          require.users.user('taxis')
 
-def install_krmt():
-    if files.exists('/usr/lib/krmt/geo.so'):
-        return
-    with cd('/tmp'):
-        run('wget https://github.com/mattsta/krmt/archive/master.zip -O krmt.zip')
-        run('unzip krmt.zip')
-        run('rm krmt.zip')
-        run('mv krmt-master krmt')
-        with cd('krmt'):
-            run('make')
-        require.files.directory('/usr/lib/krmt', use_sudo=True)
-        sudo('mv krmt/*so /usr/lib/krmt')
-        run('rm -rf yajl krmt')
-
-
-def install_yajl():
-    run('wget https://github.com/lloyd/yajl/archive/master.zip -O yajl.zip')
-    run('unzip yajl.zip')
-    run('mv yajl-master yajl')
-    run('rm yajl.zip')
-    with cd('yajl'):
-        run('./configure')
-        run('make')
-
-
 def install_redis():
     if files.exists('/usr/bin/redis-server'):
         print 'Redis is already installed'
         return
     with cd('/tmp/'):
-        install_yajl()
-        run('wget https://github.com/mattsta/redis/archive/dynamic-redis-2.8.zip')
-        run('unzip dynamic-redis-2.8.zip')
-        run('rm dynamic-redis-2.8.zip')
-        run('mv redis-dynamic-redis-2.8 redis')
+        run('wget https://github.com/antirez/redis/archive/3.2.0.zip')
+        run('unzip 3.2.0.zip')
+        run('rm 3.2.0.zip')
+        run('mv redis-3.2.0 redis')
         with cd('redis'):
             run('make')
             sudo('cp src/redis-server /usr/bin/redis-server')
@@ -101,7 +75,6 @@ def install_redis():
 
 def install_services():
     install_redis()
-    install_krmt()
     run('rm -rf /tmp/redis')
     require.file('/etc/redis.conf', source='files/redis.conf', use_sudo=True)
     if not files.exists('/var/run/supervisor.sock'):
