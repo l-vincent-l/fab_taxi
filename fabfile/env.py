@@ -23,6 +23,7 @@ def make_default_values():
 
 @task
 def load_config_dev():
+    env.name = 'dev'
     env.hosts = ['dev.api.taxi']
     env.user = 'deploy'
     env.use_ssh_config = True
@@ -58,11 +59,13 @@ def load_config_dev():
 
 @task
 def load_config_local():
+    env.name = 'local'
     env.hosts = ['127.0.0.1:2223']
     env.server_name = 'localhost'
 
 @task
 def load_config_test():
+    env.name = 'test'
     env.hosts = ['test.api.taxi']
     env.user = 'deploy'
     env.use_ssh_config = True
@@ -98,6 +101,7 @@ def load_config_test():
 
 @task
 def load_config_prod():
+    env.name = 'prod'
     env.hosts = ['api.taxi']
     env.user = 'deploy'
     env.use_ssh_config = True

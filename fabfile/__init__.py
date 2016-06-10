@@ -6,7 +6,7 @@ from fabric.contrib.console import confirm
 from fabtools import supervisor
 
 from load_config import load_config
-from machine import install_machine, restart_services, install_system
+from machine import install_machine, restart_services, install_system, install_fluentd
 from geoserver import deploy_geoserver, restart_geotaxi
 from tuning import tune_system
 from api import deploy_api, clean_directories, test_uwsgi_is_started

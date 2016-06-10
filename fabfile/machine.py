@@ -1,6 +1,7 @@
 from fabric.api import task, env, settings, sudo
 from fabric.operations import run, put, sudo, prompt
 from fabtools import require, supervisor
+from fabtools.files import is_file
 from sqlalchemy.engine import url
 from fabric.contrib import files
 from fabric.context_managers import cd
@@ -73,6 +74,19 @@ def install_redis():
             sudo('cp src/redis-cli /usr/bin/redis-cli')
             sudo('chown {0}:{0} /usr/bin/redis-cli'.format(env.user))
 
+@task
+def install_fluentd():
+    if not is_file("/etc/init.d/td-agent"):
+        sudo('curl -L https://toolbelt.treasuredata.com/sh/install-debian-jessie-td-agent2.sh | sh')
+    sudo('usermod -a -G adm td-agent')
+    sudo('/usr/sbin/td-agent-gem install fluent-plugin-elasticsearch')
+    require.files.template_file("/etc/td-agent/td-agent.conf",
+         template_source='templates/td-agent.conf',
+         context={"host_elasticsearch":env.conf_api.TDAGENT_ES_HOST,
+                  "env_name": env.name},
+         use_sudo=True)
+
+
 def install_services():
     install_redis()
     run('rm -rf /tmp/redis')
@@ -80,6 +94,7 @@ def install_services():
     if not files.exists('/var/run/supervisor.sock'):
         sudo('supervisord -c /etc/supervisor/supervisord.conf')
     supervisor.update_config()
+    install_fluentd()
 
 
 @task
@@ -89,6 +104,7 @@ def restart_services():
     require.files.file('/var/log/redis/error.log', owner=env.user, use_sudo=True)
     require.supervisor.process('redis', command=command,
             stdout_logfile='/var/log/redis/error.log')
+    require.service.restarted('td-agent')
 
 
 @task
