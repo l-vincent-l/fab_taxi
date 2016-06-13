@@ -83,7 +83,8 @@ def install_fluentd():
     require.files.template_file("/etc/td-agent/td-agent.conf",
          template_source='templates/td-agent.conf',
          context={"host_elasticsearch":env.conf_api.TDAGENT_ES_HOST,
-                  "env_name": env.name},
+                  "env_name": env.name,
+                  "host": env.conf_api.HOST},
          use_sudo=True)
 
 
