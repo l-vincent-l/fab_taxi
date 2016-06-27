@@ -1,5 +1,5 @@
 from fabric.api import task, env
-from fabric.operations import run
+from fabric.operations import run, put
 from fabtools import require, git, supervisor
 from sqlalchemy.engine import url
 from fabric.contrib import files
@@ -10,6 +10,8 @@ def init_geotaxi():
     if not files.exists('GeoTaxi'):
         git.clone('https://github.com/openmaraude/GeoTaxi')
     install_geotaxi()
+    require.files.directory('/var/log/geotaxi', use_sudo=True)
+    put('files/geotaxi.conf', '/etc/rsyslog.d/geotaxi.conf')
 
 @task
 def install_geotaxi():
