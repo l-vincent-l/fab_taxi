@@ -20,6 +20,8 @@ def make_default_values():
         env.apitaxi_config_path = lambda now: env.apitaxi_dir(now) + '/APITaxi/prod_settings.py'
     if not hasattr(env, 'fronttaxi_config_path'):
         env.fronttaxi_config_path = lambda now: env.fronttaxi_dir(now) + '/APITaxi_front/prod_settings.py'
+    if not hasattr(env, 'geotaxi_authentication'):
+        env.geotaxi_authentication = False
 
 @task
 def load_config_dev():
