@@ -11,7 +11,7 @@ def init_geotaxi():
         git.clone('https://github.com/openmaraude/GeoTaxi')
     install_geotaxi()
     require.files.directory('/var/log/geotaxi', use_sudo=True)
-    put('files/geotaxi.conf', '/etc/rsyslog.d/geotaxi.conf')
+    put('files/geotaxi.conf', '/etc/rsyslog.d/geotaxi.conf', use_sudo=True)
 
 @task
 def install_geotaxi():
@@ -24,8 +24,17 @@ def install_geotaxi():
 
 @task
 def install_process_geotaxi():
+    from .api import get_admin_key, install_admin_user
+    install_admin_user()
+    apikey = get_admin_key().splitlines()[0].strip()
     program = run('readlink -f GeoTaxi/geoloc-server')
-    require.supervisor.process('geotaxi',
+    if env.geotaxi_authentication:
+        require.supervisor.process('geotaxi',
+           command='{} {} {} {}'.format(program, env.geoserver_port,
+                                        apikey,
+                                        'https://'+env.server_name+'/users/'))
+    else:
+        require.supervisor.process('geotaxi',
             command='{} {}'.format(program, env.geoserver_port))
 
 @task

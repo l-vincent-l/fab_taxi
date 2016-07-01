@@ -171,7 +171,7 @@ def get_admin_key():
             """psql {} -tAc 'SELECT apikey FROM "user" where email='"'"'admin'"'"';'"""\
                     .format(env.conf_api.SQLALCHEMY_DATABASE_URI))
 
-def install_admin_user(now):
+def install_admin_user():
     if len(get_admin_key()) > 0:
         return
     run('python manage.py create_admin admin')
@@ -199,7 +199,7 @@ def deploy_api(commit='master'):
                         break
                     time.sleep(1)
                 run('python manage.py db upgrade')
-                install_admin_user(now)
+                install_admin_user()
         deploy_front(now)
         deploy_nginx_api_site(now)
     if not service.is_running('nginx'):
