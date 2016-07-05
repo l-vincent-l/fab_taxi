@@ -36,7 +36,6 @@ def install_swagger_ui():
         return path.join(run('pwd'), 'APITaxi_swagger')
 
 
-
 def deploy_nginx_api_site(now):
     files.upload_template('templates/uwsgi.ini',  env.uwsgi_api_config_path(now),
         context={
@@ -128,7 +127,6 @@ def clean_directories(now):
         files.remove(f, use_sudo=True)
     #The pid file should be remove when the process stops
 
-
 def stop_old_processes(now):
     def stop_process(name, visitor):
         l = run('for i in /etc/supervisor/conf.d/{}_*; do echo $i; done'.format(name)).split("\n")
@@ -157,6 +155,7 @@ def stop_old_processes(now):
              shell_env(APITAXI_CONFIG_FILE=env.apitaxi_config_path(now)):
             stop_process('send_hail', stop_queues)
 
+
 def deploy_front(now):
     with cd(env.deployment_dir(now)):
         run(u'wget {} -O front.zip'.format(env.fronttaxi_archive))
@@ -171,10 +170,12 @@ def get_admin_key():
             """psql {} -tAc 'SELECT apikey FROM "user" where email='"'"'admin'"'"';'"""\
                     .format(env.conf_api.SQLALCHEMY_DATABASE_URI))
 
+
 def install_admin_user():
     if len(get_admin_key()) > 0:
         return
     run('python manage.py create_admin admin')
+
 
 @task
 def deploy_api(commit='master'):
