@@ -110,11 +110,13 @@ def deploy_nginx_api_site(now):
         doc_dir=swagger_dir
     )
 
-    python = path.join(env.apitaxi_venv_path(now), 'bin', 'python')
-    manage = path.join(env.apitaxi_dir(now), 'manage.py')
+    path_redis = '{}/redis.sh'.format(env.deployment_dir(now))
+    require.files.template_file(path=path_redis,
+                               template_source='templates/redis.sh',
+                               context={'deployment_dir':env.deployment_dir(now)},
+                               mode='770')
     require.supervisor.process('redis',
-            command='redis-server /etc/redis.conf & {} {} warm_up_redis'.format(
-            python, manage),
+            command=path_redis,
             stdout_logfile='/var/log/redis/error.log'
     )
 
