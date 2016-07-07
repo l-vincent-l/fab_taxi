@@ -5,7 +5,7 @@ from fabtools.files import is_file
 from sqlalchemy.engine import url
 from fabric.contrib import files
 from fabric.context_managers import cd
-import re
+import re, time, os
 
 @task
 def install_system():
@@ -92,6 +92,7 @@ def install_services():
     install_redis()
     run('rm -rf /tmp/redis')
     require.file('/etc/redis.conf', source='files/redis.conf', use_sudo=True)
+    require.file('/etc/redis_cache.conf', source='files/redis_cache.conf', use_sudo=True)
     if not files.exists('/var/run/supervisor.sock'):
         sudo('supervisord -c /etc/supervisor/supervisord.conf')
     supervisor.update_config()
@@ -103,8 +104,26 @@ def restart_services():
     command = 'redis-server /etc/redis.conf'
     require.files.directory('/var/log/redis', use_sudo=True, owner=env.user)
     require.files.file('/var/log/redis/error.log', owner=env.user, use_sudo=True)
-    require.supervisor.process('redis', command=command,
-            stdout_logfile='/var/log/redis/error.log')
+    require.files.file('/var/log/redis/error_cache.log', owner=env.user, use_sudo=True)
+    if not is_file('/etc/supervisor/conf.d/redis_cache.conf')\
+       and is_file('/etc/supervisor/conf.d/redis.conf'):
+        last_save = run('redis-cli lastsave')
+        run('redis-cli bgsave')
+        print "Saving redis, it may take time"
+        for i in range(0, 600):
+            if last_save != run('redis-cli lastsave'):
+                break
+            time.sleep(1)
+        dbfile = run('redis-cli config get dbfilename|cut -f1|tail -n 1')
+        dir_ = run('redis-cli config get dir|cut -f1|tail -n 1')
+        run('sudo cp {} {}'.format(os.path.join(dir_, dbfile),
+                              '/srv/dump_redis_save.rdb'))
+    if not is_file('/etc/supervisor/conf.d/redis.conf'):
+        require.supervisor.process('redis', command=command,
+                stdout_logfile='/var/log/redis/error.log')
+    require.supervisor.process('redis_cache',
+            command='redis-server /etc/redis_cache.conf',
+            stdout_logfile='/var/log/redis/error_cache.log')
     require.service.restarted('td-agent')
 
 
