@@ -35,6 +35,13 @@ def install_swagger_ui():
         git.pull('APITaxi_swagger')
         return path.join(run('pwd'), 'APITaxi_swagger')
 
+def install_zupc_cache():
+    with cd('~'):
+        p = path.join(run('pwd'), 'zupc', 'zupc')
+        require.files.directory(p)
+        require.files.file(path.join(p, "index.html"), source="files/zupc.html")
+        return p
+
 
 def deploy_nginx_api_site(now):
     files.upload_template('templates/uwsgi.ini',  env.uwsgi_api_config_path(now),
@@ -99,6 +106,7 @@ def deploy_nginx_api_site(now):
     )
 
     swagger_dir = install_swagger_ui()
+    zupc_dir = install_zupc_cache()
 
     require.nginx.site('apitaxi',
         template_source='templates/nginx_site.conf',
@@ -107,7 +115,8 @@ def deploy_nginx_api_site(now):
         port=getattr(env.conf_api, 'PORT', 80),
         socket_api=env.uwsgi_socket_api(now),
         socket_front=env.uwsgi_socket_front(now),
-        doc_dir=swagger_dir
+        doc_dir=swagger_dir,
+        zupc_cache_dir=zupc_dir
     )
 
     path_redis = '{}/redis.sh'.format(env.deployment_dir(now))
