@@ -13,6 +13,6 @@ if __name__ == '__main__':
     concat = "".join(map(lambda k: payload[k], ['timestamp', 'operator',
         'taxi', 'lat', 'lon', 'device', 'status', 'version']))
     concat += sys.argv[2]
-    payload['hash'] = str(hashlib.sha1(concat))
+    payload['hash'] = str(hashlib.sha1(concat).hexdigest())
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.sendto(json.dumps(payload), ('127.0.0.1', int(sys.argv[3])))
