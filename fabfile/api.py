@@ -38,8 +38,9 @@ def install_swagger_ui():
 def install_zupc_cache():
     with cd('~'):
         p = path.join(run('pwd'), 'zupc', 'zupc')
-        require.files.directory(p)
-        require.files.file(path.join(p, "index.html"), source="files/zupc.html")
+        require.files.directory(p, use_sudo=True)
+        require.files.file(path.join(p, "index.html"),
+                           source="files/zupc.html", use_sudo=True)
         return p
 
 
