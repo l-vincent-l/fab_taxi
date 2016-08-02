@@ -10,7 +10,7 @@ def init_geotaxi():
     if not files.exists('GeoTaxi'):
         git.clone('https://github.com/openmaraude/GeoTaxi')
     install_geotaxi()
-    require.files.directory('/var/log/geotaxi', use_sudo=True)
+    require.files.directory('/var/log/geotaxi', use_sudo=True, owner='td-agent')
     put('files/geotaxi.conf', '/etc/rsyslog.d/geotaxi.conf', use_sudo=True)
 
 @task
