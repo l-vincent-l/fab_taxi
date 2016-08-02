@@ -28,13 +28,12 @@ def install_process_geotaxi():
     install_admin_user()
     apikey = get_admin_key().splitlines()[0].strip()
     program = run('readlink -f GeoTaxi/geoloc-server')
+    command='{} --port {} --fluentdip 0.0.0.0 --fluentdport 5160'.format(
+        program, env.geoserver_port, )
     if env.geotaxi_authentication:
-        require.supervisor.process('geotaxi',
-           command='{} --port {} --apikey {} --url {}'.format(
-               program, env.geoserver_port, apikey, 'https://'+env.server_name+'/users/'))
-    else:
-        require.supervisor.process('geotaxi',
-            command='{} --port {}'.format(program, env.geoserver_port))
+        command += ' --apikey {} --url {}'.format(apikey,
+                               'https://'+env.server_name+'/users/')
+    require.supervisor.process('geotaxi', command=command)
 
 @task
 def restart_geotaxi():
