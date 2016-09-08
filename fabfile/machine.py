@@ -51,7 +51,8 @@ def install_dependencies():
         'libgcrypt11-dev', 'unzip', 'cmake', 'libpq-dev', 'python2.7-dev',
         'supervisor', 'locales', 'postgis', 'curl', 'libpcre3', 'libpcre3-dev',
         'unzip','munin', 'libgeos-dev', 'libjpeg62-turbo-dev',
-        'libfreetype6', 'libfreetype6-dev', 'ntp', 'libcurl4-openssl-dev'])
+        'libfreetype6', 'libfreetype6-dev', 'ntp', 'libcurl4-openssl-dev',
+        'libffi-dev'])
     install_postgres_postgis()
     require.nginx.server()
 
