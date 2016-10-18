@@ -62,9 +62,13 @@ def load_config_dev():
 
 @task
 def load_config_local():
+    load_config_dev()
     env.name = 'local'
-    env.hosts = ['127.0.0.1:2223']
+    env.hosts = ['127.0.0.1:2222']
     env.server_name = 'localhost'
+    env.user = 'deploy'
+    env.geotaxi_authentication = False
+    env.ssl_enabled = False
 
 @task
 def load_config_test():

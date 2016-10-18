@@ -109,16 +109,28 @@ def deploy_nginx_api_site(now):
     swagger_dir = install_swagger_ui()
     zupc_dir = install_zupc_cache()
 
-    require.nginx.site('apitaxi',
-        template_source='templates/nginx_site.conf',
-        domain_name=getattr(env.conf_api, 'HOST', 'localhost'),
-        env='NOW={}'.format(now),
-        port=getattr(env.conf_api, 'PORT', 80),
-        socket_api=env.uwsgi_socket_api(now),
-        socket_front=env.uwsgi_socket_front(now),
-        doc_dir=swagger_dir,
-        zupc_cache_dir=zupc_dir
-    )
+    if not hasattr(env, 'ssl_enabled') or env.ssl_enabled:
+        require.nginx.site('apitaxi',
+            template_source='templates/nginx_site.conf',
+            domain_name=getattr(env.conf_api, 'HOST', 'localhost'),
+            env='NOW={}'.format(now),
+            port=getattr(env.conf_api, 'PORT', 80),
+            socket_api=env.uwsgi_socket_api(now),
+            socket_front=env.uwsgi_socket_front(now),
+            doc_dir=swagger_dir,
+            zupc_cache_dir=zupc_dir,
+        )
+    else:
+        require.nginx.site('apitaxi',
+            template_source='templates/nginx_site_nossl.conf',
+            domain_name=getattr(env.conf_api, 'HOST', 'localhost'),
+            env='NOW={}'.format(now),
+            port=getattr(env.conf_api, 'PORT', 80),
+            socket_api=env.uwsgi_socket_api(now),
+            socket_front=env.uwsgi_socket_front(now),
+            doc_dir=swagger_dir,
+            zupc_cache_dir=zupc_dir,
+        )
 
     path_redis = '{}/redis.sh'.format(env.deployment_dir(now))
     require.files.template_file(path=path_redis,
@@ -188,7 +200,7 @@ def deploy_front(now):
 def get_admin_key():
     return run(
             """psql {} -tAc 'SELECT apikey FROM "user" where email='"'"'admin'"'"';'"""\
-                    .format(env.conf_api.SQLALCHEMY_DATABASE_URI))
+                    .format(env.conf_api.SQLALCHEMY_DATABASE_URI), warn_only=True)
 
 
 def install_admin_user():
