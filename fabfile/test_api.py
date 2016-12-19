@@ -61,11 +61,11 @@ def test_add_driver(curl, apikey):
                 expected, data, get_diff(expected, data)))
 
 def test_add_taxi(curl, apikey):
-    remote_file = '/tmp/taxi.json'
-    put('files/taxi.json', remote_file)
+    local_file = 'files/taxi.json'
+    remote_file = '/tmp/testing_uwsgi_taxi'
+    put(local_file, remote_file)
     header, data = curl('/taxis/', apikey, 'POST', '@{}'.format(remote_file))
-    expected = open('files/taxi_expected.json').read()
-    except_id_added(expected, data)
+    except_id_added(open('files/taxi_expected.json').read(), data)
     return json.loads(data)['data'][0]['id']
 
 def send_position_taxi(taxi_id, apikey):
