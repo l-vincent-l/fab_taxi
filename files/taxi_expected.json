@@ -11,6 +11,7 @@
                 "professional_licence": "testing_licence"
             }, 
             "last_update": null, 
+            "internal_id":null,
             "operator": null, 
             "position": {
                 "lat": null, 
