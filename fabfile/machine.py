@@ -1,10 +1,11 @@
 from fabric.api import task, env, settings, sudo
 from fabric.operations import run, put, sudo, prompt
-from fabtools import require, supervisor
+from fabtools import require, supervisor, deb, python
 from fabtools.files import is_file
 from sqlalchemy.engine import url
 from fabric.contrib import files
 from fabric.context_managers import cd
+from fabtools.cron import add_task
 import re, time, os
 
 @task
@@ -101,6 +102,20 @@ def install_services():
 
 
 @task
+def install_acme():
+    path_venv = "/home/deploy/venv/acme"
+    renew_command = "{} -d {} && service nginx reload".format(
+                os.path.join(path_venv, "bin", "acme-nginx"),
+                getattr(env.conf_api, 'HOST', 'localhost'))
+    require.python.virtualenv(path_venv)
+    with python.virtualenv(path_venv):
+        require.python.package("acme-nginx")
+        if not is_file("/etc/ssl/private/letsencrypt-account.key", use_sudo=True):
+            sudo(renew_command)
+    add_task("renew-cert", "@monthly", "root", renew_command)
+
+
+@task
 def restart_services():
     command = 'redis-server /etc/redis.conf'
     require.files.directory('/var/log/redis', use_sudo=True, owner=env.user)
@@ -126,6 +141,7 @@ def restart_services():
             command='redis-server /etc/redis_cache.conf',
             stdout_logfile='/var/log/redis/error_cache.log')
     require.service.restarted('td-agent')
+    install_acme()
 
 
 @task
