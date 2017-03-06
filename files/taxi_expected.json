@@ -18,13 +18,14 @@
             }, 
             "rating": 4.5, 
             "status": "free", 
+            "internal_id": null,
             "vehicle": {
                 "characteristics": null, 
-                "color": null, 
-                "constructor": null, 
+                "color": "string", 
+                "constructor": "string", 
                 "licence_plate": "testing_uwsgi", 
                 "model": "string", 
-                "nb_seats": null
+                "nb_seats": 0
             },
             "operator": null
         }
