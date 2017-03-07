@@ -14,6 +14,7 @@ from zupc import import_zupc
 from dash import *
 from env import env, load_config_dev, load_config_test, load_config_prod, load_config_local
 import logging
+from test_api import test_api
 logging.basicConfig()
 
 
