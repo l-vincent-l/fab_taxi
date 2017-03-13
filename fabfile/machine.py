@@ -78,8 +78,11 @@ def install_redis():
 
 @task
 def install_fluentd():
-    if not is_file("/etc/init.d/td-agent"):
-        sudo('curl -L https://toolbelt.treasuredata.com/sh/install-debian-jessie-td-agent2.sh | sh')
+    deb.add_apt_key(url="https://packages.treasuredata.com/GPG-KEY-td-agent")
+    require.deb.source("treasure-data",
+                       "http://packages.treasuredata.com/2/debian/jessie/",
+                       "jessie", "contrib")
+    require.deb.package("td-agent")
     sudo('usermod -a -G adm td-agent')
     sudo('/usr/sbin/td-agent-gem install fluent-plugin-elasticsearch')
     require.files.template_file("/etc/td-agent/td-agent.conf",
