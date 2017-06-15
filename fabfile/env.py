@@ -47,6 +47,7 @@ def load_config_dev():
     env.name = 'dev'
     env.server_name = 'dev.api.taxi'
     env.hosts = [env.server_name]
+    env.influx_db_dir = '/home/deploy/influx'
 
 @task
 def load_config_local():
@@ -67,5 +68,6 @@ def load_config_prod():
     env.hosts = [env.server_name]
 
     env.wsgi_processes = 24
+    env.geotaxi_authentication = False
 
 make_default_values()
