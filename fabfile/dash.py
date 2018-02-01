@@ -15,7 +15,7 @@ def install_influxdb():
     if files.is_file('/usr/bin/influxd'):
         return
     with cd('/tmp/'):
-        package_name = 'influxdb_0.9.6.1_amd64.deb'
+        package_name = 'influxdb_0.10.3-1__amd64.deb'
         run('wget http://influxdb.s3.amazonaws.com/{}'.format(package_name))
         sudo('dpkg -i {}'.format(package_name))
         run('rm {}'.format(package_name))
@@ -27,8 +27,6 @@ def install_influxdb():
         ))
     run('influx -execute "CREATE DATABASE IF NOT EXISTS {}"'.format(
         env.conf_api.INFLUXDB_TAXIS_DB))
-
-
 
 @task
 def configure_influxdb():
