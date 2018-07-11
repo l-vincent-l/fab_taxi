@@ -60,6 +60,7 @@ def load_config_test():
     env.name = 'test'
     env.server_name = 'test.api.taxi'
     env.hosts = [env.server_name]
+    env.geotaxi_authentication = False
 
 @task
 def load_config_prod():
