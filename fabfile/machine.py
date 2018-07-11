@@ -36,7 +36,7 @@ def install_system():
 
 
 def install_postgres_postgis():
-    require.postgres.server()
+    require.postgres.server(10)
     u = url.make_url(env.conf_api.SQLALCHEMY_DATABASE_URI)
     require.postgres.user(u.username, u.password)
     require.postgres.database(u.database, owner=u.username, locale=env.postgres_locale)
@@ -46,7 +46,10 @@ def install_postgres_postgis():
 
 
 def install_dependencies():
-    require.deb.uptodate_index()
+    require.deb.source("postgresql", "http://apt.postgresql.org/pub/repos/apt/",
+                       "jessie-pgdg", "main")
+    sudo("wget --no-check-certificate -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O- | apt-key add -")
+    sudo("apt-get update")
     require.deb.packages(['autoconf-archive', 'automake-1.14', 'autoconf2.59',
         'build-essential', 'check', 'libspatialindex-dev', 'git',
         'libgcrypt11-dev', 'unzip', 'cmake', 'libpq-dev', 'python2.7-dev',
@@ -62,17 +65,23 @@ def add_users():
 
 def install_redis():
     if files.exists('/usr/bin/redis-server'):
-        print 'Redis is already installed'
-        return
-    with cd('/tmp/'):
-        run('wget https://github.com/antirez/redis/archive/3.2.0.zip')
-        run('unzip 3.2.0.zip')
-        run('rm 3.2.0.zip')
-        run('mv redis-3.2.0 redis')
+        version = run('redis-server --version')
+        if 'v=4.0' in version:
+            print 'Redis 4.0 is already installed'
+            return
+    with cd('/tmp'):
+        run('wget http://download.redis.io/releases/redis-4.0.8.tar.gz')
+        run('tar -xf redis-4.0.8.tar.gz')
+        run('rm redis-4.0.8.tar.gz')
+        run('mv redis-4.0.8 redis')
         with cd('redis'):
             run('make')
+            supervisor.stop_process('redis')
+            supervisor.stop_process('redis_cache')
             sudo('cp src/redis-server /usr/bin/redis-server')
             sudo('chown {0}:{0} /usr/bin/redis-server'.format(env.user))
+            supervisor.start_process('redis')
+            supervisor.start_process('redis_cache')
             sudo('cp src/redis-cli /usr/bin/redis-cli')
             sudo('chown {0}:{0} /usr/bin/redis-cli'.format(env.user))
 
