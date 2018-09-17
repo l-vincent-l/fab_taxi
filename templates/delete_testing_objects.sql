@@ -9,7 +9,7 @@ DO LANGUAGE plpgsql $$
         SELECT driver_id INTO driver_v FROM taxi where id = '%(taxi_id)s';
         DELETE FROM taxi where id = '%(taxi_id)s';
         DELETE FROM "ADS" where id = ads_v;
-        DELETE FROM vehicle_description where id = vehicle_v;
+        DELETE FROM vehicle_description where vehicle_id = vehicle_v;
         DELETE FROM vehicle where id = vehicle_v;
         DELETE FROM driver where id = driver_v;
     END;
