@@ -120,7 +120,7 @@ def install_acme():
     renew_command = "{} -d {} && service nginx reload".format(
                 os.path.join(path_venv, "bin", "acme-nginx"),
                 getattr(env.conf_api, 'HOST', 'localhost'))
-    require.python.virtualenv(path_venv)
+    require.python.virtualenv(path_venv, python_cmd="python3")
     with python.virtualenv(path_venv):
         require.python.package("acme-nginx")
         if not is_file("/etc/ssl/private/letsencrypt-account.key", use_sudo=True)\
