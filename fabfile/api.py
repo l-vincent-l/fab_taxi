@@ -208,7 +208,7 @@ def deploy_api(commit='master'):
             run('mv APITaxi-{} APITaxi-master'.format(commit))
 
     with cd(env.apitaxi_dir(now)):
-        require.python.virtualenv(env.apitaxi_venv_path(now), python_cmd="python3")
+        require.python.virtualenv(env.apitaxi_venv_path(now), venv_python="python3")
         with python.virtualenv(env.apitaxi_venv_path(now)):
             python.install_pip(use_sudo=False)
             require.python.package('uwsgi')
