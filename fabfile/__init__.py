@@ -1,7 +1,5 @@
 from __future__ import with_statement
 import importlib
-from fabric.api import *
-from fabric.contrib.console import confirm
 
 from fabtools import supervisor
 

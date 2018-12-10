@@ -1,10 +1,8 @@
 celery==4.2.1
-Fabric==1.10.2
-fabtools==0.19.0
+fabtools==0.20.0
 importlib==1.0.3
 influxdb==2.11.0
 jsondiff==0.2.0
-pycrypto==2.6.1
 requests==2.8.0
 six==1.10.0
 sqlalchemy==1.2.11
