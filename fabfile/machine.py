@@ -43,20 +43,22 @@ def install_postgres_postgis():
     with settings(sudo_user='postgres'):
         sudo('psql -c "CREATE EXTENSION IF NOT EXISTS postgis;" --dbname={}'\
                 .format(u.database))
+        sudo('psql -c "ALTER EXTENSION postgis UPDATE;;" --dbname={}'\
+                .format(u.database))
 
 
 def install_dependencies():
     require.deb.source("postgresql", "http://apt.postgresql.org/pub/repos/apt/",
-                       "jessie-pgdg", "main")
+                       "stretch-pgdg", "main")
     sudo("wget --no-check-certificate -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O- | apt-key add -")
     sudo("apt-get update")
-    require.deb.packages(['autoconf-archive', 'automake-1.14', 'autoconf2.59',
+    require.deb.packages(['autoconf-archive', 'automake-1.15', 'autoconf',
         'build-essential', 'check', 'libspatialindex-dev', 'git',
         'libgcrypt11-dev', 'unzip', 'cmake', 'libpq-dev', 'python2.7-dev',
         'supervisor', 'locales', 'postgis', 'curl', 'libpcre3', 'libpcre3-dev',
         'unzip','munin', 'libgeos-dev', 'libjpeg62-turbo-dev',
         'libfreetype6', 'libfreetype6-dev', 'ntp', 'libcurl4-openssl-dev',
-        'libffi-dev', 'python3-dev'])
+        'libffi-dev', 'python3-dev', 'postgresql-9.4-postgis-scripts', 'postgresql-9.4-postgis'])
     install_postgres_postgis()
     require.nginx.server()
 
@@ -89,8 +91,8 @@ def install_redis():
 def install_fluentd():
     deb.add_apt_key(url="https://packages.treasuredata.com/GPG-KEY-td-agent")
     require.deb.source("treasure-data",
-                       "http://packages.treasuredata.com/2/debian/jessie/",
-                       "jessie", "contrib")
+                       "http://packages.treasuredata.com/2/debian/stretch/",
+                       "stretch", "contrib")
     require.deb.package("td-agent")
     sudo('usermod -a -G adm td-agent')
     sudo('/usr/sbin/td-agent-gem install fluent-plugin-elasticsearch')
