@@ -201,6 +201,8 @@ def install_admin_user():
 def deploy_api(commit='master'):
     now = int(time.time())
     require.files.directory(env.deployment_dir(now))
+    require.files.directory('/var/run/uwsgi_socket', use_sudo=True, owner='www-data', group='www-data')
+    require.files.directory('/var/run/uwsgi', use_sudo=True, owner='www-data', group='www-data')
     with cd(env.deployment_dir(now)):
         run(u'wget {}'.format(env.apitaxi_archive.format(commit)))
         run('unzip {}.zip'.format(commit))
